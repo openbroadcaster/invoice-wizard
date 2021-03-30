@@ -1,0 +1,18 @@
+<h1>View companies</h1>
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
+<button type="button" class="add" onclick="OBModules.OBAdPSASystemModule.add_new_company();">New</button>
+<table id="companies_table" class="ad_system_table">
+  <thead>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_companies('name');">Company Name</a></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_companies('phone');">Phone Number</a></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_companies('street_addr');">Street</a></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_companies('city');">City</a></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_companies('zip_code');">Postal/Zip Code</a></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_companies('country');">Country</a></th>
+    <!-- Blank th's for the edit, and remove buttons. -->
+    <th></th>
+    <th></th>
+  </thead>
+  <tbody id="companies_table_body">
+  </tbody>
+</table>

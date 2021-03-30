@@ -1,0 +1,58 @@
+<!--/*
+    Copyright 2012 OpenBroadcaster, Inc.
+
+    This file is part of OpenBroadcaster Server.
+
+    OpenBroadcaster Server is free software you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenBroadcaster Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with OpenBroadcaster Server.  If not, see <http//www.gnu.org/licenses/>.
+*/-->
+
+<h1>New Campaign</h1>
+<label for="current_advertiser">Advertiser</label>
+<span id="current_advertiser">Loading...</span>
+<hr>
+<label for="current_buyer">Buyer</label>
+<span id="current_buyer">Loading...</span>
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 4 of 4
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.get_page('review1.html');">Back</button>
+	<button type="button" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.submit_invoice();">Finish</button>
+</div>
+<h2>Review</h2>
+<fieldset>
+	<legend>
+		(Creative) Media
+	</legend>
+	<div class="fieldrow">
+		<label for="creative">Creative</label>
+		<span id="creative"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="ad_id">Ad-ID</label>
+		<span id="ad_id"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="media_type">Media Type</label>
+		<span id="media_type"></span>
+	</div>
+</fieldset>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 4 of 4
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.get_page('review1.html');">Back</button>
+	<button type="button" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.submit_invoice();">Finish</button>
+</div>

@@ -1,0 +1,144 @@
+<fieldset>
+	<legend>
+		AD/PSA system settings
+	</legend>
+	<obwidget type="message" id="ad_psa_system_settings_message"></obwidget>
+	<p>
+		The system for requesting, and playing PSA/Ad messages in with automation.
+		<br>
+		This page allows you to enter all main settings for the OB Ad/PSA System.
+	</p>
+	<button onclick="OBModules.OBAdPSASystemModule.open_add_company_to_player_modal_btn_clicked();">Add companies to players</button>
+	<div class="fieldrow">
+		<label for="aws_region_name">AWS Region</label>
+		<select name="aws_region_name" id="aws_region_name" required>
+				<option value="us-east-2">US East (Ohio)</option>
+				<option value="us-east-1">US East (N. Virginia)</option>
+				<option value="us-west-1">US West (N. California)</option>
+				<option value="us-west-2">US West (Oregon)</option>
+				<option value="us-gov-east-1">AWS GovCloud (US-East)</option>
+				<option value="us-gov-west-1">AWS GovCloud (US-West)</option>
+				<option value="ca-central-1">Canada (Central)</option>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="aws_access_key_id">AWS key ID</label>
+		<input type="text" name="aws_access_key_id" id="aws_access_key_id" value="" required>
+	</div>
+  <div class="fieldrow">
+    <label for="aws_secret_access_key">AWS secret access key</label>
+    <input type="password" name="aws_secret_access_key" id="aws_secret_access_key" value="" required>
+  </div>
+	<div class="fieldrow">
+		<label for="stripe_publishable_key">Stripe Publishable key</label>
+		<input type="text" name="stripe_publishable_key" id="stripe_publishable_key" value="" required>
+	</div>
+	<div class="fieldrow">
+		<label for="stripe_secret_key">Stripe Secret key</label>
+		<input type="password" name="stripe_secret_key" id="stripe_secret_key" value="" required>
+	</div>
+	<div class="fieldrow">
+		<label for="currency">currency</label>
+		<select name="currency" id="currency" required>
+			<option value="usd">United States Dollars (USD)</option>
+			<option value="cad">Canadian Dollars (CAD)</option>
+		</select>
+	</div>
+	<p>All values for hourly rates should be entered with only the amount, such as "20.00".</p>
+	<div class="fieldrow">
+		<label for="morning_hourly_rate">Morning Hourly Rate</label>
+		<input type="text" name="morning_hourly_rate" id="morning_hourly_rate" value="">
+	</div>
+	<div class="fieldrow">
+		<label for="midday_hourly_rate">Mid-day Hourly Rate</label>
+		<input type="text" name="midday_hourly_rate" id="midday_hourly_rate" value="">
+	</div>
+	<div class="fieldrow">
+		<label for="drive_hourly_rate">Drive Hourly Rate</label>
+		<input type="text" name="drive_hourly_rate" id="drive_hourly_rate" value="">
+	</div>
+	<div class="fieldrow">
+		<label for="ros_hourly_rate">ROS Hourly Rate</label>
+		<input type="text" name="ros_hourly_rate" id="ros_hourly_rate" value="">
+	</div>
+	<div class="fieldrow">
+		<label for="">Current Invoice logo</label>
+		<img src="modules/obadpsasystem/temp_media/station_logo.jpeg" alt="Station Logo" width="40%" height="40%">
+	</div>
+	<div class="fieldrow">
+		<label for="">Download Invoice logo</label>
+		<a href="modules/obadpsasystem/temp_media/station_logo.jpeg" download>Download</a>
+	</div>
+	<div class="fieldrow">
+		<label for="logo_upload_btn">Invoice logo</label>
+		<button type="button" id="logo_upload_btn" onclick="OBModules.OBAdPSASystemModule.open_logo_modal_btn_clicked();">Upload</button>
+	</div>
+	<div class="fieldrow">
+		<label for="defualt_country">Default Country</label>
+		<select class="" name="country" id="defualt_country">
+			<option value="" hidden selected>Please select a Country</option>
+			<option value="US">United States</option>
+			<option value="CA">Canada</option>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="default_language">Default Language</label>
+		<select class="" name="language" id="default_language" onchange="OBModules.OBAdPSASystemModule.language_selected();">
+			<option value="" hidden selected>Please select a Language</option>
+			<option value="English">English</option>
+			<option value="Arabic">Arabic</option>
+			<option value="Chinese-Mandarin">Chinese-Mandarin</option>
+			<option value="Dutch">Dutch</option>
+			<option value="French">French</option>
+			<option value="German">German</option>
+			<option value="Italian">Italian</option>
+			<option value="Portuguese">Portuguese</option>
+			<option value="Spanish">Spanish</option>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="language_sets">Language Sets</label>
+		<select class="" name="language_sets" id="language_sets" multiple onchange="OBModules.OBAdPSASystemModule.language_subset_selected();">
+		</select>
+	</div>
+	<label for="enabled_sets">Enabled Languages</label>
+	<hr>
+	<div class="fieldrow">
+		<label for="enabled_sets">English</label>
+		<input type="checkbox" id="English_checkbox" value="English" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">Arabic</label>
+		<input type="checkbox" id="Arabic_checkbox" value="Arabic" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">Chinese-Mandarin</label>
+		<input type="checkbox" id="Chinese_Mandarin_checkbox" value="Chinese-Mandarin" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">Dutch</label>
+		<input type="checkbox" id="Dutch_checkbox" value="Dutch" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">French</label>
+		<input type="checkbox" id="French_checkbox" value="French" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">German</label>
+		<input type="checkbox" id="German_checkbox" value="German" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">Italian</label>
+		<input type="checkbox" id="Italian_checkbox" value="Italian" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">Portuguese</label>
+		<input type="checkbox" id="Portuguese_checkbox" value="Portuguese" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">Spanish</label>
+		<input type="checkbox" id="Spanish_checkbox" value="Spanish" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
+	</div>
+
+	<button onclick="OBModules.OBAdPSASystemModule.save_settings();">Save</button>
+</fieldset>

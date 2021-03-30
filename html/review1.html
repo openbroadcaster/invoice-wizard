@@ -1,0 +1,118 @@
+<!--/*
+    Copyright 2012 OpenBroadcaster, Inc.
+
+    This file is part of OpenBroadcaster Server.
+
+    OpenBroadcaster Server is free software you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenBroadcaster Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with OpenBroadcaster Server.  If not, see <http//www.gnu.org/licenses/>.
+*/-->
+
+<h1>New Campaign</h1>
+<label for="current_advertiser">Advertiser</label>
+<span id="current_advertiser">Loading...</span>
+<hr>
+<label for="current_buyer">Buyer</label>
+<span id="current_buyer">Loading...</span>
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 3 of 4
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('media_info.html');">Back</button>
+	<button type="button" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.get_page('review2.html');">Next</button>
+</div>
+<h2>Review</h2>
+<fieldset>
+	<legend>
+		Advertiser/Buyer info
+	</legend>
+	<div class="fieldrow">
+		<label for="contract_number">Contract Number</label>
+		<span id="contract_number"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="revenue_type">Revenue Type</label>
+		<span id="revenue_type"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="start_date_time">Start Date/Time</label>
+		<span id="start_date_time"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="stop_date_time">Stop Date/Time</label>
+		<span id="stop_date_time"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="campaign_name">Campaign name</label>
+		<span id="campaign_name"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="attention_to">Attention To</label>
+		<span id="attention_to"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="advertiser">Advertiser</label>
+		<span id="advertiser"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="advertiser_notes">Advertiser Notes</label>
+		<pre class="scrolled_text" id="advertiser_notes"></pre>
+	</div>
+	<div class="fieldrow">
+		<label for="buyer">Buyer</label>
+		<span id="buyer"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="stations">Stations</label>
+		<span id="stations"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="time_slots">Time Slots</label>
+		<span id="time_slots"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="address">Address</label>
+		<span id="address"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="city">City</label>
+		<span id="city"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="state_prov">Province/State</label>
+		<span id="state_prov"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="country">Country</label>
+		<span id="country"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="zip_code">Postal/ZIP Code</label>
+		<span id="zip_code"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="sales_rep">Sales Rep</label>
+		<span id="sales_rep"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="">Email</label>
+		<span id="bill_to_email"></span>
+	</div>
+</fieldset>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 3 of 5
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('media_info.html');">Back</button>
+	<button type="button" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.get_page('review2.html');">Next</button>
+</div>

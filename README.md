@@ -1,2 +1,1 @@
-# invoice-wizard
-invoice-wizard
+# OBInvoiceModule

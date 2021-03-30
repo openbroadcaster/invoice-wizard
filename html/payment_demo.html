@@ -1,0 +1,37 @@
+<h1>New Invoice</h1>
+<button type="button" name="button" onclick="OBModules.OBAdPSASystemModule.select_last_client();">Select last client</button>
+<button type="button" name="button" disabled>New client</button>
+<h2>Payment</h2>
+
+<fieldset>
+	<legend>
+		Card Paymentd
+	</legend>
+  <p>This system accepts Discover, Mastercard, and Visa cards.</p>
+  <div class="fieldrow">
+    <label for="card">Name on Card</label>
+    <input type="text" name="name_on_card" value="">
+  </div>
+  <div class="fieldrow">
+    <label for="card">Card Number</label>
+    <input type="text" name="card_number" value="">
+  </div>
+  <div class="fieldrow">
+    <label for="card">Expire Date</label>
+    <input type="text" name="card_expire_date" value="" placeholder="MM / YY">
+  </div>
+  <div class="fieldrow">
+    <label for="card">CVC</label>
+    <input type="text" name="card_cvc" value="">
+  </div>
+  <button type="button" name="button" onclick="OBModules.OBAdPSASystemModule.payment_btn_clicked();">Pay now</button>
+  <p>This payment screen is for demo purposes only!</p>
+</fieldset>
+
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 3 of 3
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.get_page('broadcast_data.html');">Back</button>
+	<button type="button" id="next_btn" disabled>Next</button>
+</div>

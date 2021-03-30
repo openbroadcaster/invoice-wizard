@@ -1,0 +1,121 @@
+<h2>Add companies to player</h2>
+<obwidget type="message" id="ad_psa_system_modal_status_message"></obwidget>
+<fieldset>
+  <div class="fieldrow">
+    <label for="player_devices">Selected Player</label>
+    <select id="player_devices">
+    </select>
+  </div>
+  <div class="fieldrow">
+		<label for="company_name">Company name</label>
+		<input type="text" name="company_name" id="company_name" value="" required>
+	</div>
+	<div class="fieldrow">
+		<label for="company_phone">Company phone number</label>
+		<input type="tel" name="company_phone" id="company_phone" value="" required>
+	</div>
+	<div class="fieldrow">
+		<label for="company_street_address">Company street address</label>
+		<input type="text" name="company_street_address" id="company_street_address" value="" required>
+	</div>
+	<div class="fieldrow">
+		<label for="company_city">Company city</label>
+		<input type="text" name="company_city" id="company_city" value="" required>
+	</div>
+	<div class="fieldrow">
+		<label for="company_state_prov">Company province/state</label>
+		<select class="" id="company_state_prov" name="company_state_prov" required>
+			<option value="" hidden selected>Please select a State/Prov</option>
+			<optgroup label="US">
+				<option>Alabama</option>
+				<option>Alaska</option>
+				<option>Arizona</option>
+				<option>Arkansas</option>
+				<option>California</option>
+				<option>Colorado</option>
+				<option>Connecticut</option>
+				<option>Delaware</option>
+				<option>Florida</option>
+				<option>Georgia</option>
+				<option>Hawaii</option>
+				<option>Idaho</option>
+				<option>Illinois</option>
+				<option>Indiana</option>
+				<option>Iowa</option>
+				<option>Kansas</option>
+				<option>Kentucky</option>
+				<option>Louisiana</option>
+				<option>Maine</option>
+				<option>Maryland</option>
+				<option>Massachusetts</option>
+				<option>Michigan</option>
+				<option>Minnesota</option>
+				<option>Mississippi</option>
+				<option>Missouri</option>
+				<option>Montana</option>
+				<option>Nebraska</option>
+				<option>Nevada</option>
+				<option>New Hampshire</option>
+				<option>New Jersey</option>
+				<option>New Mexico</option>
+				<option>New York</option>
+				<option>North Carolina</option>
+				<option>North Dakota</option>
+				<option>Ohio</option>
+				<option>Oklahoma</option>
+				<option>Oregon</option>
+				<option>Pennsylvania</option>
+				<option>Rhode Island</option>
+				<option>South Carolina</option>
+				<option>South Dakota</option>
+				<option>Tennessee</option>
+				<option>Texas</option>
+				<option>Utah</option>
+				<option>Vermont</option>
+				<option>Virginia</option>
+				<option>Washington</option>
+				<option>West Virginia</option>
+				<option>Wisconsin</option>
+				<option>Wyoming</option>
+			</optgroup>
+			<optgroup label="US Territories">
+				<option>American Samoa</option>
+				<option>Guam</option>
+				<option>Northern Mariana Islands</option>
+				<option>Puerto Rico</option>
+				<option>US Virgin Islands</option>
+			</optgroup>
+			<optgroup label="Canada">
+				<option>Ontario</option>
+				<option>Quebec</option>
+				<option>Nova Scotia</option>
+				<option>New Brunswick</option>
+				<option>Manitoba</option>
+				<option>British Columbia</option>
+				<option>Prince Edward Island</option>
+				<option>Saskatchewan</option>
+				<option>Alberta</option>
+				<option>Newfoundland and Labrador</option>
+			</optgroup>
+			<optgroup label="Canada Territories">
+				<option>Northwest Territories</option>
+				<option>Nunavut</option>
+				<option>Yukon</option>
+			</optgroup>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="company_zip_code">Company zip/postal code</label>
+		<input type="text" name="company_zip_code" id="company_zip_code" value="" required>
+	</div>
+	<div class="fieldrow">
+		<label for="company_country">Company country</label>
+		<select class="" id="company_country" name="company_country" required>
+			<option value="" hidden selected>Please select a country</option>
+			<option value="US">United States</option>
+			<option value="CA">Canada</option>
+		</select>
+	</div>
+</fieldset>
+<button class="add" onclick="OBModules.OBAdPSASystemModule.save_company();">Save</button>
+<button class="edit" onclick="OB.UI.closeModalWindow();">Close</button>

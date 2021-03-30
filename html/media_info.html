@@ -1,0 +1,132 @@
+<h1>New Campaign</h1>
+<label for="current_advertiser">Advertiser</label>
+<span id="current_advertiser">Loading...</span>
+<hr>
+<label for="current_buyer">Buyer</label>
+<span id="current_buyer">Loading...</span>
+<br>
+<!-- <button type="button" name="button" onclick="OBModules.OBAdPSASystemModule.select_last_client();" disabled>Select last client</button> -->
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 2 of 4
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('start.html', true);">Back</button>
+	<button type="button" id="next_btn" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.save_data('media_info.html', 'review1.html');" disabled>Next</button>
+</div>
+<fieldset>
+	<legend>
+		(Creative) Media
+	</legend>
+	<div class="fieldrow">
+		<label for="creative">Creative</label>
+		<input type="text" name="creative" id="creative" value="" required>
+	</div>
+	<div class="fieldrow" id="ad_id_row">
+		<label for="ad_id">Ad-ID</label>
+		<input type="text" name="ad_id" id="ad_id" value="" placeholder="ABCD1234000D" required>
+	</div>
+	<div class="fieldrow">
+		<label for="has_ad_id">I don't have a Ad-ID</label>
+		<input type="checkbox" id="has_ad_id" name="has_ad_id" value="0" onchange="OBModules.OBAdPSASystemModule.disable_ad_id();">
+	</div>
+	<div class="fieldrow">
+		<label for="audio_type">Media Type</label>
+		<select name="audio_type" id="audio_type" onchange="OBModules.OBAdPSASystemModule.selected_audio_type();" required>
+			<option value="upload">Upload Media</option>
+			<option value="aws_tts">AWS Polly TTS</option>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="message_type">Message Type</label>
+		<select name="message_type" id="message_type" onchange="OBModules.OBAdPSASystemModule.selected_audio_type();" required>
+			<option value="ad">Commercial Ad</option>
+			<option value="psa">Public Service Announcement</option>
+		</select>
+	</div>
+	<div id="polly_tts_area">
+		<div id="audio_player_area">
+			<audio id="audio_player"></audio>
+		</div>
+		<div class="fieldrow">
+		  <label for="voice">Polly TTS Voice</label>
+		  <select class="" id="voice" required>
+		    <option value="Ivy">Ivy</option>
+		    <option value="Joanna" selected>Joanna</option>
+		    <option value="Kendra">Kendra</option>
+		    <option value="Kimberly">Kimberly</option>
+		    <option value="Salli">Salli</option>
+		    <option value="Joey">Joey</option>
+		    <option value="Justin">Justin</option>
+		    <option value="Matthew">Matthew</option>
+		  </select>
+		</div>
+		<div class="fieldrow">
+			<label for="message_text">Message Text</label>
+			<textarea id="message_text" name="message_text" rows="8" cols="80" onload="OBModules.OBAdPSASystemModule.message_text_onload();"></textarea>
+		</div>
+		<div class="fieldrow">
+			<label for="character_count">Character Count</label>
+			<div id="character_count">0 chars</div>
+		</div>
+		<div class="fieldrow">
+			<label for="tts_speed">Voice Speed</label>
+			<input type="range" min="20" max="200" step="1" list="tickmarks" id="tts_speed" name="tts_speed" value="100">
+		</div>
+		<datalist id="tickmarks">
+      <option value="20" label="20%"></option>
+      <option value="30"></option>
+      <option value="40"></option>
+      <option value="50" label="50%"></option>
+      <option value="60"></option>
+      <option value="70"></option>
+      <option value="80"></option>
+      <option value="90"></option>
+      <option value="100" label="100%"></option>
+			<option value="110"></option>
+			<option value="120"></option>
+			<option value="130"></option>
+			<option value="140"></option>
+			<option value="150" label="150%"></option>
+			<option value="160"></option>
+			<option value="170"></option>
+			<option value="180"></option>
+			<option value="190"></option>
+			<option value="200" label="200%"></option>
+    </datalist>
+		<div class="fieldrow">
+			<label for="bed_music">Bed Music</label>
+			<select name="bed_music" id="bed_music" onchange="OBModules.OBAdPSASystemModule.bed_music_handling();">
+				<!-- Placeholder is in use until list of bed tracks are located. -->
+				<option value="" selected>None</option>
+				<option value="bed_music/ForeverBelieve.mp3">Track one</option>
+			</select>
+		</div>
+		<div class="fieldrow">
+			<div id="tts_vol_area">
+				<label for="bed_music_vol">Bed Music volume (12-24 dB)</label>
+				<input type="range" id="bed_music_vol" step="1" min="12" max="24" value="12">
+			</div>
+		</div>
+		<div class="fieldrow">
+			<label>Controls</label>
+			<button type="button" onclick="OBModules.OBAdPSASystemModule.request_tts_audio();" id="tts_start_btn">Play</button>
+			<button type="button" onclick="OBModules.OBAdPSASystemModule.stop_tts();" id="tts_stop_btn">Stop</button>
+			<button id="submit_audio_tts_btn" type="button" onclick="OBModules.OBAdPSASystemModule.submit_audio_tts();">Submit audio</button>
+		</div>
+	</div>
+	<div id="audio_file_upload_area">
+		<div class="fieldrow">
+			<label for="audio_file">Audio File</label>
+			<input type="file" accept="audio/*" id="audio_file" value="" onchange="OBModules.OBAdPSASystemModule.media_check();" required>
+			<button type="button" id="submit_audio_btn" required onclick="OBModules.OBAdPSASystemModule.media_upload();">Submit audio</button>
+		</div>
+	</div>
+</fieldset>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 2 of 4
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('start.html', true);">Back</button>
+	<button type="button" id="next_btn" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.save_data('media_info.html', 'review1.html');" disabled>Next</button>
+</div>

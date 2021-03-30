@@ -1,0 +1,18 @@
+<h1>Campaigns</h1>
+<button type="button" class="add" onclick="OBModules.OBAdPSASystemModule.start_page();">New</button>
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
+<table id="campaign_table" class="ad_system_table">
+  <thead>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_campaigns('name');">Name<a/></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_campaigns('start_date_time');">Start date/time<a/></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_campaigns('stop_date_time');">Stop date/time<a/></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_campaigns('buyer');">Buyer<a/></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_campaigns('advertiser');">Advertiser<a/></th>
+    <th><a onclick="OBModules.OBAdPSASystemModule.sort_campaigns('stations');">Stations<a/></th>
+    <!-- Blank th's for the edit, and remove buttons. -->
+    <th></th>
+    <th></th>
+  </thead>
+  <tbody id="campaign_table_body">
+  </tbody>
+</table>
