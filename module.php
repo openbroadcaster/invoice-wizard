@@ -1,7 +1,7 @@
 <?php
 
 /*
-    Copyright 2012 OpenBroadcaster, Inc.
+    Copyright 2021 OpenBroadcaster, Inc.
     This file is part of OpenBroadcaster Server.
     OpenBroadcaster Server is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -18,8 +18,8 @@
 class OBAdPSASystemModule extends OBFModule
 {
 
-	public $name = 'OB AD/PSA System';
-	public $description = 'The OpenBroadcaster AD/PSA System allows ad buyers to submit Ads, or PSAs to broadcasters.';
+	public $name = 'Campaign Wizard v1.0';
+	public $description = 'AD/PSA system allows media buyers to create and submit POLLY Ads or PSAs.';
 
 	public function callbacks()
 	{
