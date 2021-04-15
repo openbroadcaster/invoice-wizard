@@ -33,7 +33,7 @@ class OBAdPSADSystemModule extends OBFController
     parent::__construct();
     $this->AdsModel = $this->load->model('Ads');
     $this->SettingsModel = $this->load->model('Settings');
-    $this->DevicesModel = $this->load->model('Devices');
+    $this->PlayersModel = $this->load->model('Players');
     $this->media_model = $this->load->model('media');
     $this->uploads_model = $this->load->model('uploads');
     $this->buyers_model = $this->load->model('Buyer');
@@ -527,8 +527,8 @@ class OBAdPSADSystemModule extends OBFController
 
   public function get_all_devices()
   {
-    $devices = $this->DevicesModel->get_all();
-    $json_data = json_encode($devices);
+    $players = $this->PlayersModel->get_all();
+    $json_data = json_encode($players);
     $this->log('get_all_devices', 'All devices returned');
     return [true, 'All devices returned', $json_data];
   }
