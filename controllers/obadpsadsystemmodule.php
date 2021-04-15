@@ -203,11 +203,11 @@ class OBAdPSADSystemModule extends OBFController
       $sales_rep = $this->data('sales_rep');
       $start_date = $this->data('start_date');
       $stop_date = $this->data('stop_date');
-      $devices = explode(',', $this->data('devices'));
-      $device_names = [];
-      foreach ($devices as $device_id) {
-        $device = $this->DevicesModel->get_one($device_id);
-        array_push($device_names, $device['name']);
+      $players = explode(',', $this->data('devices'));
+      $player_names = [];
+      foreach ($players as $player_id) {
+        $player = $this->PlayersModel->get_one($player_id);
+        array_push($player_names, $player['name']);
       }
       $creative = $this->data('creative');
       $ad_id = $this->data('ad_id');
@@ -219,12 +219,12 @@ class OBAdPSADSystemModule extends OBFController
       $revenue_type = $this->data('revenue_type');
       $contract_number = $this->data('contract_number');
       $campaign_notes = $this->data('campaign_notes');
-      $media_data = ['file_id' => $media_file_id, 'invoices' => $invoice_id, 'time_slots' => $time_slots, 'devices' => $devices];
+      $media_data = ['file_id' => $media_file_id, 'invoices' => $invoice_id, 'time_slots' => $time_slots, 'players' => $players];
       $invoice_data = ['invoice_id' => $invoice_id, 'attention_to' => $attention_to, 'advertiser' => $advertiser,
                       'billing_mailing_address' => $billing_mailing_address, 'billing_mailing_city' => $billing_mailing_city,
                       'billing_mailing_state_prov' => $billing_mailing_state_prov, 'billing_mailing_zip_code' => $billing_mailing_zip_code,
                       'billing_email' => $billing_email, 'sales_rep' => $sales_rep,
-                      'device_names' => implode(',', $device_names), 'device_ids' => implode(',', $devices), 'creative' => $creative,
+                      'player_names' => implode(',', $player_names), 'player_ids' => implode(',', $players), 'creative' => $creative,
                       'ad_id' => $ad_id, 'time_slots' => $time_slots,
                       'media_type' => $media_type, 'media_file_id' => $media_file_id, 'billing_mailing_country' => $billing_mailing_country,
                       'start_date' => $start_date, 'stop_date' => $stop_date, 'campaign_name' => $campaign_name,
