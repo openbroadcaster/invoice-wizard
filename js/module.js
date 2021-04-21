@@ -1347,7 +1347,7 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.start_page_data_init = function()
   {
-    setTimeout(OBModules.OBAdPSASystemModule.load_buyers, 100);
+    //setTimeout(OBModules.OBAdPSASystemModule.load_buyers, 100);
     setTimeout(() => {
       document.getElementById('start_date').value = OBModules.OBAdPSASystemModule.get_date(now=true);
       document.getElementById('stop_date').value = OBModules.OBAdPSASystemModule.get_date(now=false);
