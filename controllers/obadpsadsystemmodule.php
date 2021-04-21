@@ -527,8 +527,12 @@ class OBAdPSADSystemModule extends OBFController
 
   public function get_all_devices()
   {
+    $output = [];
     $players = $this->PlayersModel->get_all();
-    $json_data = json_encode($players);
+    foreach ($players as $player) {
+      array_push($output, ['name' => $player['name'], 'id' => $player['id']]);
+    }
+    $json_data = json_encode($output);
     $this->log('get_all_devices', 'All devices returned');
     return [true, 'All devices returned', $json_data];
   }
