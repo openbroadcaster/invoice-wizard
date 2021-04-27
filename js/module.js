@@ -1620,10 +1620,13 @@ OBModules.OBAdPSASystemModule = new function()
         'bed_music_vol': bed_music_vol
       }, function(res) {
         console.log(res);
+        if (res.status == false) {
+          $('#ad_psa_system_status_message').obWidget('error', res.msg);
+          return;
+        }
         let data = res.data;
-        let json_data = JSON.parse(data);
-        let file_path = json_data.file_path;
-        console.log(json_data);
+        let file_path = data.file_path;
+        console.log(data);
         OBModules.OBAdPSASystemModule.set_data('last_aws_polly_text', message_text);
         OBModules.OBAdPSASystemModule.set_data('last_aws_polly_audio_filename', file_path);
         OBModules.OBAdPSASystemModule.set_data('last_tts_speed', tts_speed);
