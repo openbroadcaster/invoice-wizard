@@ -1622,15 +1622,15 @@ OBModules.OBAdPSASystemModule = new function()
         console.log(res);
         if (res.status == false) {
           $('#ad_psa_system_status_message').obWidget('error', res.msg);
-          return;
+        } else {
+          let data = res.data;
+          let file_path = data.file_path;
+          console.log(data);
+          OBModules.OBAdPSASystemModule.set_data('last_aws_polly_text', message_text);
+          OBModules.OBAdPSASystemModule.set_data('last_aws_polly_audio_filename', file_path);
+          OBModules.OBAdPSASystemModule.set_data('last_tts_speed', tts_speed);
+          OBModules.OBAdPSASystemModule.play_tts(mode='load');
         }
-        let data = res.data;
-        let file_path = data.file_path;
-        console.log(data);
-        OBModules.OBAdPSASystemModule.set_data('last_aws_polly_text', message_text);
-        OBModules.OBAdPSASystemModule.set_data('last_aws_polly_audio_filename', file_path);
-        OBModules.OBAdPSASystemModule.set_data('last_tts_speed', tts_speed);
-        OBModules.OBAdPSASystemModule.play_tts(mode='load');
       });
     } else {
       OBModules.OBAdPSASystemModule.play_tts(mode='play');
