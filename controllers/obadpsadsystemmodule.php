@@ -84,10 +84,10 @@ class OBAdPSADSystemModule extends OBFController
     if ($data[0]) {
         $this->media_model->save($item);
         $this->log('save_media', 'The media was uploaded!');
-        return [true, null, "TEST4"];
+        return [true, 'The media was uploaded!', "TEST4"];
       } else {
         $this->log('save_media', 'The media wasn\'t uploaded!');
-        return [false, null, $data];
+        return [false, 'The media wasn\'t uploaded!', $data];
       }
   }
 
