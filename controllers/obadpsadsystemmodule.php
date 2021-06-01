@@ -570,7 +570,7 @@ class OBAdPSADSystemModule extends OBFController
           break;
           // Checking text is only A-Z chars, spaces, commas, dashes, or ().
           case 'buyer':
-            if (! preg_match('/^[A-z|a-z|0-9|\–|\(|\)|,| ]+$/', $value)) {
+            if (! preg_match('/^[A-z|a-z|0-9|\–|\(|\)|,|\'| ]+$/', $value)) {
               array_push($status_messages, 'buyer has invaild character(s)! Only A-Z, commas, spaces, and "()" is allowed.');
             }
             break;

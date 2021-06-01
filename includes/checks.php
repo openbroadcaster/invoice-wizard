@@ -52,6 +52,15 @@ function check_a_z_0_9_dashes($value) {
   return true;
 }
 
+// Checks if text only has A-z, spaces, 0-9, dashes, and '.
+
+function check_a_z_0_9_dashes_quotes($value) {
+  if (! preg_match('/^[A-Za-z0-9\'– ]+$/', $value)) {
+    return false;
+  }
+  return true;
+}
+
 // Checks zip/postal code.
 
 function check_zip_code($value) {
