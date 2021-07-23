@@ -1332,7 +1332,8 @@ OBModules.OBAdPSASystemModule = new function()
             $('#ad_psa_system_status_message').obWidget('success', 'No invoices found!');
         }
       } else {
-        $('#ad_psa_system_status_message').obWidget('error', 'A request to get the invoices has failed! If this continues, please contact a server admin.');
+        //$('#ad_psa_system_status_message').obWidget('error', 'A request to get the invoices has failed! If this continues, please contact a server admin.');
+        $('#layout_main').html('<h3>No invoices found!</h3><p>Since there isn\'t any invoices you need to create first.</p><button>Create invoice...?</button>');
       }
     });
   }
