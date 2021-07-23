@@ -510,7 +510,7 @@ OBModules.OBAdPSASystemModule = new function()
   this.view_campaigns = function()
   {
     OB.UI.replaceMain('modules/obadpsasystem/view_campaigns.html');
-    setTimeout(() => OBModules.OBAdPSASystemModule.load_campainins, 800);
+    setTimeout(() => OBModules.OBAdPSASystemModule.load_campaigns, 800);
   }
 
   // Adds a campaign to the table of campaigns.
@@ -592,7 +592,7 @@ OBModules.OBAdPSASystemModule = new function()
 
   // Gets the current campaigns from the server.
 
-  this.load_campainins = function()
+  this.load_campaigns = function()
   {
     let val = localStorage.getItem('campaign_table_sortby');
     if (val != null) {
