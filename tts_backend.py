@@ -22,7 +22,7 @@ def args_veify(args):
                 or args.voice == 'Justin' or args.voice == 'Matthew' or args.voice == 'Chantal' :
                     pass
                 else:
-                    return false
+                    return False
         elif arg_list_item == 'speed':
             if args.speed != None:
                 if args.speed > 19 and args.speed < 201:
@@ -64,6 +64,8 @@ class TTS:
     def __init__(self, voice='Joanna', speed=None, aws_access_key_id=None, aws_secret_access_key=None, aws_region_name='us-east-1'):
         self.voice = voice
         self.speed = speed
+        if self.speed == None:
+            self.speed = 0.5
         self.polly_client = boto3.Session(
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
