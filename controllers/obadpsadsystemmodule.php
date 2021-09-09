@@ -384,8 +384,8 @@ class OBAdPSADSystemModule extends OBFController
       $this->log('get_tts_voices', 'The list of tts voices as returned.');
       return [true, '', $voices];
     } else {
-      $this->log('get_tts_voices', 'Failed to get the currently active voices from the server!');
-      return [false, 'Failed to get the currently active voices from the server!', null];
+      $this->log('get_tts_voices', 'Failed to get the currently active voices from the server! Please ensure the tts settings in the admin is set.');
+      return [false, 'Failed to get the currently active voices from the server! Please ensure the tts settings in the admin is set.', null];
     }
   }
 
