@@ -403,12 +403,13 @@ class OBAdPSADSystemModule extends OBFController
     $aws_secret_access_key = $this->SettingsModel->get_setting('aws_secret_access_key');
     //echo $aws_secret_access_key;
     //$aws_region_name = $this->data('aws_region_name');
-    $aws_region_name = 'us-east-1';
+    $aws_region_name = $this->SettingsModel->get_setting('aws_region_name');
+    //$aws_region_name = 'us-east-1';
     if (empty($aws_access_key_id) || empty($aws_secret_access_key)) {
       $this->log('request_tts_audio', 'Your tts request has failed! Please add your AWS API Keys for Polly TTS creation.');
       return [false, "Your tts request has failed! Please add your AWS API Keys for Polly TTS creation.", null];
     }
-    $cmd = 'python modules/obadpsasystem/tts_backend.py'. ' --voice '. $voice. ' --speed '. $speed. ' --text "'. $text. '" --aws_access_key_id "'. $aws_access_key_id. '" --aws_secret_access_key "'. $aws_secret_access_key. '" --aws_region_name '. $aws_region_name. ' --music_bed_track "'. $bed_music. '" --music_bed_track_volume '. $bed_music_vol;
+    $cmd = 'python3 modules/obadpsasystem/tts_backend.py'. ' --voice '. $voice. ' --speed '. $speed. ' --text "'. $text. '" --aws_access_key_id "'. $aws_access_key_id. '" --aws_secret_access_key "'. $aws_secret_access_key. '" --aws_region_name "'. $aws_region_name. '" --music_bed_track "'. $bed_music. '" --music_bed_track_volume '. $bed_music_vol;
     //exec(implode(" ", $cmd). " 2>&1", $output, $return_val);
     exec($cmd. " 2>&1", $output, $return_val);
     if ($return_val == 0) {
