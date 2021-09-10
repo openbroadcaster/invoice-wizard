@@ -409,7 +409,7 @@ class OBAdPSADSystemModule extends OBFController
       $this->log('request_tts_audio', 'Your tts request has failed! Please add your AWS API Keys for Polly TTS creation.');
       return [false, "Your tts request has failed! Please add your AWS API Keys for Polly TTS creation.", null];
     }
-    $cmd = 'python3 modules/obadpsasystem/tts_backend.py'. ' --voice '. $voice. ' --speed '. $speed. ' --text "'. $text. '" --aws_access_key_id "'. $aws_access_key_id. '" --aws_secret_access_key "'. $aws_secret_access_key. '" --aws_region_name "'. $aws_region_name. '" --music_bed_track "'. $bed_music. '" --music_bed_track_volume '. $bed_music_vol;
+    $cmd = 'PATH=/home/obsuser/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin modules/obadpsasystem/tts_backend.sh'. ' --voice '. $voice. ' --speed '. $speed. ' --text "'. $text. '" --aws_access_key_id "'. $aws_access_key_id. '" --aws_secret_access_key "'. $aws_secret_access_key. '" --aws_region_name "'. $aws_region_name. '" --music_bed_track "'. $bed_music. '" --music_bed_track_volume '. $bed_music_vol;
     //exec(implode(" ", $cmd). " 2>&1", $output, $return_val);
     exec($cmd. " 2>&1", $output, $return_val);
     if ($return_val == 0) {
