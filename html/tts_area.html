@@ -83,6 +83,20 @@
   </div>
 </div>
 <div class="fieldrow">
+  <label for="message_type">Message Type</label>
+  <select name="" id="message_type">
+    <option value="" hidden selected>Please select a type</option>
+    <option value="ad">AD</option>
+    <option value="psa">PSA</option>
+    <option value="other">Other</option>
+  </select>
+</div>
+<div class="fieldrow">
+  <label for="creative">Media Title/Creative</label>
+  <input type="text" name="" id="creative">
+</div>
+<input style="display: none;" type="text" name="" id="has_ad_id" value="0">
+<div class="fieldrow">
   <label>Controls</label>
   <button type="button" onclick="OBModules.OBAdPSASystemModule.request_tts_audio();" id="tts_start_btn">Play</button>
   <button type="button" onclick="OBModules.OBAdPSASystemModule.stop_tts();" id="tts_stop_btn">Stop</button>

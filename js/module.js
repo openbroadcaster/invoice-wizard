@@ -1668,10 +1668,17 @@ OBModules.OBAdPSASystemModule = new function()
     let last_aws_polly_audio_filename = OBModules.OBAdPSASystemModule.get_data('last_aws_polly_audio_filename');
     let creative = document.getElementById('creative').value;
     let message_type = document.getElementById('message_type').value;
-    let ad_id = document.getElementById('ad_id').value;
     let tts_start_btn = document.getElementById('tts_start_btn');
     let tts_stop_btn = document.getElementById('tts_stop_btn');
     let has_ad_id = document.getElementById('has_ad_id').checked;
+    let ad_id = '';
+
+    console.log('has_ad_id', has_ad_id);
+
+    // Handle TTS standlone area.
+    if (has_ad_id != false) {
+      ad_id = document.getElementById('ad_id').value;
+    }
     OB.API.post('obadpsadsystemmodule', 'submit_tts_audio', {
       'audio_file': last_aws_polly_audio_filename,
       'creative': creative,
