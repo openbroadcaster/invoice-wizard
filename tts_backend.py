@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import boto3
 import uuid
 import wave
@@ -115,7 +117,7 @@ class TTS:
                                         '-i', file_path, file_path.replace('.pcm', '.wav')], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             process.wait()
 
-            if music:
+            if music and os.path.exists('modules/obadpsasystem/' + music_bed_track):
                 file_name = self.make_audio_mix(file_path.replace('.pcm', '.wav'), music_bed_track, music_bed_track_volume)
 
             if os.path.isfile(file_path.replace('.pcm', '.wav')) == False:
@@ -186,7 +188,7 @@ if __name__ == '__main__':
     args = args_parser.parse_args()
     if args_veify(args):
         tts = TTS(speed=args.speed, aws_access_key_id=args.aws_access_key_id, aws_secret_access_key=args.aws_secret_access_key, voice=args.voice)
-        if args.music_bed_track != "":
+        if args.music_bed_track != "None":
             tts.gen(args.text, args.music_bed_track, args.music_bed_track_volume)
         else:
             tts.gen(args.text, None, args.music_bed_track_volume)
