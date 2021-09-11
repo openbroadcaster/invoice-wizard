@@ -1624,7 +1624,7 @@ OBModules.OBAdPSASystemModule = new function()
         if (res.status == false) {
           $('#ad_psa_system_status_message').obWidget('error', res.msg);
         } else {
-          let data = res.data;
+          let data = JSON.parse(res.data);
           let file_path = data.file_path;
           console.log(data);
           OBModules.OBAdPSASystemModule.set_data('last_aws_polly_text', message_text);
