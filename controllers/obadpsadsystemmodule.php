@@ -84,7 +84,7 @@ class OBAdPSADSystemModule extends OBFController
     // Debug
     echo 'data: '. var_dump($data);
     if ($data[0]) {
-        $this->media_model->save($item);
+        $this->media_model->save(['item'=>$item]);
         $this->log('save_media', 'The media was uploaded!');
         return [true, 'The media was uploaded!', null];
       } else {
@@ -428,8 +428,9 @@ class OBAdPSADSystemModule extends OBFController
     $file_path = "/tmp/temp_media/". $audio_file;
     $creative = $this->data('creative');
     $message_type = $this->data('message_type');
+    $has_ad_id = $this->data('has_ad_id');
     $ad_id = $this->data('ad_id');
-    if (empty($ad_id)) {
+    if (empty($ad_id) && $has_ad_id) {
       $this->log('submit_tts_audio', 'Failed to save the tts audio! Please enter a Ad-ID first.');
       return [false, "Failed to save the tts audio! Please enter a Ad-ID first.", null];
     }
@@ -445,7 +446,7 @@ class OBAdPSADSystemModule extends OBFController
       $this->log('submit_tts_audio', 'Failed to save the tts audio!');
       return [false, "Failed to save the tts audio!", null];
     }
-    $ch = curl_init("localhost/../../upload.php");
+    $ch = curl_init("localhost/upload.php");
 
     curl_setopt($ch, CURLOPT_POST, true);
     $file = fopen($file_path, "r");
@@ -468,21 +469,31 @@ class OBAdPSADSystemModule extends OBFController
 
     if(curl_error($ch)) {
         $this->log('submit_tts_audio', 'Failed to save the tts audio!');
-        return [false, "Failed to save the tts audio!", curl_error($ch)];
+        return [false, "Failed to save the tts audio! upload 1", curl_error($ch)];
     } else {
+      //$file_info = $json_data->info->media_info;
       $file_info = $this->uploads_model->file_info($file_id, $file_key);
+      // file info should be from media info in json from upload.php request data.
       $item = array('file_id' => $file_id, 'file_key' => $file_key, 'artist' => 'AD System', 'title' => $creative, 'file_info' => $file_info, 'is_approved' => 1, 'is_copyright_owner' => 0, 'dynamic_select' => 0,'status' => 'public',
-      'category_id' => 2, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => 'AD/PSA Messages');
-      $data = $this->media_model->validate($item);
+      'category_id' => 2, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => 'AD/PSA Messages', 'country_id' => 231, 'language_id' => 54, 'local_id' => 2);
+      //print_r(var_dump($item));
+      $data = $this->media_model->validate(array('item' => $item));
+      //var_dump($data);
+	//print_r(var_dump($data));
+      //print_r($data[3]);
       if ($data[0]) {
-        $this->media_model->save($item);
+        $this->media_model->save(array('item' => $item));
         // If the media is saved in the server, then remove it from /tmp/temp_media/.
+        //$ch2 = curl_init('localhost/api.php');
+        //curl_setopt($ch2, CURLOPT_POSTFIELDS, "c=media&a=save&d=". json_encode($item). "appkey=". "Nw==:vzPEmI9uI4hk5awZFeeLQiLx4i1ApRAE7ywKc+rgkHw=");
+        //curl_setopt($ch2, CURLOPT_RETURNTRANSFER, 1);
+        //print_r(curl_exec($ch2));
         unlink($file_path);
         $this->log('submit_tts_audio', 'Saved tts audio!');
         return [true, "Saved tts audio!", $returned_data];
       } else {
         $this->log('submit_tts_audio', 'Failed to save the tts audio!');
-        return [false, "Failed to save the tts audio!", $data[2]];
+        return [false, "Failed to save the tts audio! upload 2", $data[2]];
       }
     }
     curl_close($ch);
