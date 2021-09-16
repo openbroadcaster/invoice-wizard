@@ -444,6 +444,8 @@ class OBAdPSADSystemModule extends OBFController
       $genre_id = 994;
     } elseif ($message_type == 'psa') {
       $genre_id = 995;
+    } elseif ($message_type == 'other') {
+      $genre_id = 999;
     } else {
       // This is a failsafe though we always get one of the values above,
       // if for some reason we don't reject the request.
