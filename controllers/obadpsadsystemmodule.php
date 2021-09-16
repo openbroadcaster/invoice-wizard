@@ -434,6 +434,7 @@ class OBAdPSADSystemModule extends OBFController
     $message_type = $this->data('message_type');
     $has_ad_id = $this->data('has_ad_id');
     $ad_id = $this->data('ad_id');
+    $standalone = $this->data('standalone');
     if (empty($ad_id) && $has_ad_id) {
       $this->log('submit_tts_audio', 'Failed to save the tts audio! Please enter a Ad-ID first.');
       return [false, "Failed to save the tts audio! Please enter a Ad-ID first.", null];
@@ -442,10 +443,16 @@ class OBAdPSADSystemModule extends OBFController
       // For now as a workaround to allow for the media to be in ad/psa category the ad message will
       // use the PSA disabled code. This should be changed.
       $genre_id = 994;
+      $category_id = 2;
+      $album = 'AD/PSA Messages';
     } elseif ($message_type == 'psa') {
       $genre_id = 995;
+      $category_id = 2;
+      $album = 'AD/PSA Messages';
     } elseif ($message_type == 'other') {
       $genre_id = 999;
+      $category_id = 10;
+      $album = 'AD/PSA/Other TTS Messages';
     } else {
       // This is a failsafe though we always get one of the values above,
       // if for some reason we don't reject the request.
@@ -481,7 +488,7 @@ class OBAdPSADSystemModule extends OBFController
       $file_info = $this->uploads_model->file_info($file_id, $file_key);
       // file info should be from media info in json from upload.php request data.
       $item = array('file_id' => $file_id, 'file_key' => $file_key, 'artist' => 'AD System', 'title' => $creative, 'file_info' => $file_info, 'is_approved' => 1, 'is_copyright_owner' => 0, 'dynamic_select' => 0,'status' => 'public',
-      'category_id' => 2, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => 'AD/PSA Messages', 'country_id' => 231, 'language_id' => 54, 'local_id' => 2);
+      'category_id' => $category_id, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => $album, 'country_id' => 231, 'language_id' => 54, 'local_id' => 2);
       $data = $this->media_model->validate(array('item' => $item));
       if ($data[0]) {
         $this->media_model->save(array('item' => $item));
@@ -491,8 +498,13 @@ class OBAdPSADSystemModule extends OBFController
         //curl_setopt($ch2, CURLOPT_RETURNTRANSFER, 1);
         //print_r(curl_exec($ch2));
         unlink($file_path);
-        $this->log('submit_tts_audio', 'Saved tts audio!');
-        return [true, "Saved tts audio!", $returned_data];
+        if ($standalone) {
+          $this->log('submit_tts_audio', 'Your audio has been uploaded. Do not exit the wizard!');
+          return [true, "Your audio has been uploaded.", $returned_data];
+        } else {
+          $this->log('submit_tts_audio', 'Your audio has been uploaded. Do not exit the wizard!');
+          return [true, "Your audio has been uploaded. Do not exit the wizard!", $returned_data];
+        }
       } else {
         $this->log('submit_tts_audio', 'Failed to save the tts audio!');
         return [false, "Failed to save the tts audio! upload 2", $data[2]];

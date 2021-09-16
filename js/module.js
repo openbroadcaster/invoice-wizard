@@ -1687,11 +1687,12 @@ OBModules.OBAdPSASystemModule = new function()
       'creative': creative,
       'message_type': message_type,
       'ad_id': ad_id,
-      'has_ad_id': has_ad_id
+      'has_ad_id': has_ad_id,
+      'standalone': document.getElementById('standalone').value
     }, function(res) {
       console.log(res);
       if (res.status == true) {
-        $('#ad_psa_system_status_message').obWidget('success', "Your AD/PSA is uploaded. Do not exit the wizard!");
+        $('#ad_psa_system_status_message').obWidget('success', res.msg);
         tts_start_btn.disabled = true;
         tts_stop_btn.disabled = true;
         OBModules.OBAdPSASystemModule.nable_next_btn();
