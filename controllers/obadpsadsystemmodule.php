@@ -476,11 +476,7 @@ class OBAdPSADSystemModule extends OBFController
       // file info should be from media info in json from upload.php request data.
       $item = array('file_id' => $file_id, 'file_key' => $file_key, 'artist' => 'AD System', 'title' => $creative, 'file_info' => $file_info, 'is_approved' => 1, 'is_copyright_owner' => 0, 'dynamic_select' => 0,'status' => 'public',
       'category_id' => 2, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => 'AD/PSA Messages', 'country_id' => 231, 'language_id' => 54, 'local_id' => 2);
-      //print_r(var_dump($item));
       $data = $this->media_model->validate(array('item' => $item));
-      //var_dump($data);
-	//print_r(var_dump($data));
-      //print_r($data[3]);
       if ($data[0]) {
         $this->media_model->save(array('item' => $item));
         // If the media is saved in the server, then remove it from /tmp/temp_media/.
