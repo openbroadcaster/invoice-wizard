@@ -1,4 +1,4 @@
-<obwidget type="message" id="ad_psa_system_tts_message"></obwidget>
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
 <h1>New TTS Message</h1>
 <div id="audio_player_area">
   <audio id="audio_player"></audio>
@@ -100,5 +100,5 @@
   <label>Controls</label>
   <button type="button" onclick="OBModules.OBAdPSASystemModule.request_tts_audio();" id="tts_start_btn">Play</button>
   <button type="button" onclick="OBModules.OBAdPSASystemModule.stop_tts();" id="tts_stop_btn">Stop</button>
-  <button id="submit_audio_tts_btn" type="button" onclick="OBModules.OBAdPSASystemModule.submit_audio_tts();">Submit audio</button>
+  <button disabled id="submit_audio_tts_btn" type="button" onclick="OBModules.OBAdPSASystemModule.submit_audio_tts();">Submit audio</button>
 </div>

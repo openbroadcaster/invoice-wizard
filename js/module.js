@@ -1609,6 +1609,7 @@ OBModules.OBAdPSASystemModule = new function()
     let tts_speed = document.getElementById('tts_speed').value;
     let last_tts_speed = OBModules.OBAdPSASystemModule.get_data('last_tts_speed');
     let bed_music = document.getElementById('bed_music').value;
+    let submit_audio_tts_btn = document.getElementById('submit_audio_tts_btn');
     if (bed_music == "") { bed_music = null; }
     let bed_music_vol = document.getElementById('bed_music_vol').value;
 
@@ -1623,7 +1624,9 @@ OBModules.OBAdPSASystemModule = new function()
         console.log(res);
         if (res.status == false) {
           $('#ad_psa_system_status_message').obWidget('error', res.msg);
+          submit_audio_tts_btn.disabled = true;
         } else {
+          submit_audio_tts_btn.disabled = false;
           let data = JSON.parse(res.data);
           let file_path = data.file_path;
           console.log(data);
