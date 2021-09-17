@@ -1674,6 +1674,8 @@ OBModules.OBAdPSASystemModule = new function()
     let tts_start_btn = document.getElementById('tts_start_btn');
     let tts_stop_btn = document.getElementById('tts_stop_btn');
     let has_ad_id = document.getElementById('has_ad_id').checked;
+    let standalone = document.getElementById('standalone').value;
+    let county = document.getElementById('country').value;
     let ad_id = '';
 
     console.log('has_ad_id', has_ad_id);
@@ -1688,7 +1690,8 @@ OBModules.OBAdPSASystemModule = new function()
       'message_type': message_type,
       'ad_id': ad_id,
       'has_ad_id': has_ad_id,
-      'standalone': document.getElementById('standalone').value
+      'standalone': standalone,
+      'county': county
     }, function(res) {
       console.log(res);
       if (res.status == true) {

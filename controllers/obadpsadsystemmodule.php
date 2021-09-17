@@ -435,7 +435,12 @@ class OBAdPSADSystemModule extends OBFController
     $has_ad_id = $this->data('has_ad_id');
     $ad_id = $this->data('ad_id');
     $standalone = $this->data('standalone');
-    if (empty($ad_id) && $has_ad_id) {
+    $county = $this->data('county');
+    if (empty($county) && $county == '') {
+      $this->log('submit_tts_audio', 'Failed to save the tts audio! Please select a county first.');
+      return [false, "Failed to save the tts audio! Please select a county first.", null];
+    }
+    if (empty($ad_id) && $has_ad_id == '') {
       $this->log('submit_tts_audio', 'Failed to save the tts audio! Please enter a Ad-ID first.');
       return [false, "Failed to save the tts audio! Please enter a Ad-ID first.", null];
     }
