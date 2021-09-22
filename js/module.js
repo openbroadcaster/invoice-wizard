@@ -1698,7 +1698,9 @@ OBModules.OBAdPSASystemModule = new function()
         $('#ad_psa_system_status_message').obWidget('success', res.msg);
         tts_start_btn.disabled = true;
         tts_stop_btn.disabled = true;
-        OBModules.OBAdPSASystemModule.nable_next_btn();
+        if (standalone) {
+          OBModules.OBAdPSASystemModule.enable_next_btn();
+        }
         let response = JSON.parse(res.data);
         OBModules.OBAdPSASystemModule.media = response;
         let media = OBModules.OBAdPSASystemModule.media;
