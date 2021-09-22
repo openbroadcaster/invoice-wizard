@@ -1840,6 +1840,10 @@ OBModules.OBAdPSASystemModule = new function()
         if (has_ad_id == false) {
           let ad_id = document.getElementById('ad_id').value;
           OBModules.OBAdPSASystemModule.set_data('ad_id', ad_id);
+        } else {
+          // Handle not requiring a Ad-ID.
+          OBModules.OBAdPSASystemModule.set_data('ad_id', "NA");
+          document.getElementById('ad_id').value = 'NA';
         }
         let tmp_media_type = document.getElementById('audio_type').value;
         let media_type = tmp_media_type = 'upload' ? 1 : 2;

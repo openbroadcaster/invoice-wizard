@@ -642,10 +642,13 @@ class OBAdPSADSystemModule extends OBFController
             }
           break;
           case 'ad_id':
-            // Checks if the Ad-ID is valid.
-            if (! preg_match('/^[1-9|A-Za-z][0-9A-Za-z]{3}[0-9]{4}[0-9]{3}[|H|D]$/', $value)) {
-              if(! preg_match('/^[1-9|A-Za-z][0-9A-Za-z]{3}[0-9]{4}[0-9]{3}$/', $value)) {
-                array_push($status_messages, 'The Ad-ID is invaild!');
+            // Checks if the user isn't requiring a Ad-ID.
+            if ($value != "NA") {
+              // Checks if the Ad-ID is valid.
+              if (! preg_match('/^[1-9|A-Za-z][0-9A-Za-z]{3}[0-9]{4}[0-9]{3}[|H|D]$/', $value)) {
+                if(! preg_match('/^[1-9|A-Za-z][0-9A-Za-z]{3}[0-9]{4}[0-9]{3}$/', $value)) {
+                  array_push($status_messages, 'The Ad-ID is invaild!');
+                }
               }
             }
           break;
