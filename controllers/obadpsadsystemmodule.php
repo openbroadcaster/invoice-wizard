@@ -85,9 +85,7 @@ class OBAdPSADSystemModule extends OBFController
     $file_info = $this->uploads_model->file_info($file_id, $file_key);
     $item = array('file_id' => $file_id, 'file_key' => $file_key, 'artist' => 'AD System', 'title' => $creative, 'file_info' => $file_info, 'is_approved' => 1, 'is_copyright_owner' => 0, 'dynamic_select' => 0,'status' => 'public',
     'category_id' => $category_id, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => 'AD/PSA Messages', 'local_id' => 1);
-    $data = $this->media_model->validate($item, false);
-    // Debug
-    echo 'data: '. var_dump($data);
+    $data = $this->media_model->validate(['item'=>$item], false);
     if ($data[0]) {
         $this->media_model->save(['item'=>$item]);
         $this->log('save_media', 'The media was uploaded!');
