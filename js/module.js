@@ -1920,10 +1920,10 @@ OBModules.OBAdPSASystemModule = new function()
     }, function(res) {
       console.log(res);
       if (res.status) {
-        $('layout_main_container').html('Your message has been submitted.<br>Thank you for using the media/invoice wizard.\
+        $('#layout_main_container').html('Your message has been submitted.<br>Thank you for using the media/invoice wizard.\
           <br>You should now be able to view your media in the slidebar.');
       } else {
-        $('layout_main_container').html('Your invoice couldn\'t be submited. If the issue continues please contact the server admin.');
+        $('#layout_main_container').html('Your invoice couldn\'t be submited. If the issue continues please contact the server admin.');
       }
     });
   }
