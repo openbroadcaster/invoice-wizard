@@ -229,7 +229,7 @@ class OBAdPSADSystemModule extends OBFController
                       'billing_mailing_address' => $billing_mailing_address, 'billing_mailing_city' => $billing_mailing_city,
                       'billing_mailing_state_prov' => $billing_mailing_state_prov, 'billing_mailing_zip_code' => $billing_mailing_zip_code,
                       'billing_email' => $billing_email, 'sales_rep' => $sales_rep,
-                      'player_names' => implode(',', $player_names), 'player_ids' => implode(',', $players), 'creative' => $creative,
+                      'device_names' => implode(',', $player_names), 'device_ids' => implode(',', $players), 'creative' => $creative,
                       'ad_id' => $ad_id, 'time_slots' => $time_slots,
                       'media_type' => $media_type, 'media_file_id' => $media_file_id, 'billing_mailing_country' => $billing_mailing_country,
                       'start_date' => $start_date, 'stop_date' => $stop_date, 'campaign_name' => $campaign_name,
@@ -569,6 +569,9 @@ class OBAdPSADSystemModule extends OBFController
   {
     $output = [];
     $players = $this->PlayersModel->get_all();
+    if ($players == False) {
+      return [false, 'Your server needs atleast one player device before you can use this module!', null];
+    }
     foreach ($players as $player) {
       array_push($output, ['name' => $player['name'], 'id' => $player['id']]);
     }
