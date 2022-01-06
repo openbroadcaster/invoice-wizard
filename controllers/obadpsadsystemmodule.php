@@ -404,7 +404,7 @@ class OBAdPSADSystemModule extends OBFController
     // Handle invaild options, or no option selected errors.
     if (empty($voice) || $voice == '') return [false, "Please select a TTS langauge, lagauage set, and voice!", null];
     if (empty($speed) || $speed == '') return [false, "Please select a TTS speed!", null];
-    if (empty($text) || $text == '') return [false, "Please type message to speak!", null];
+    if (empty($text) || $text == '') return [false, "Please type a message to speak!", null];
     $aws_access_key_id = $this->SettingsModel->get_setting('aws_access_key_id');
     //echo $aws_access_key_id;
     $aws_secret_access_key = $this->SettingsModel->get_setting('aws_secret_access_key');
