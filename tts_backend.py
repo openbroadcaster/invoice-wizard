@@ -64,6 +64,7 @@ class TTS:
     def __init__(self, voice='Joanna', speed=None, aws_access_key_id=None, aws_secret_access_key=None, aws_region_name='us-east-1'):
         self.voice = voice
         self.speed = speed
+        self.bg_supported = True
         self.polly_client = boto3.Session(
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
@@ -71,17 +72,26 @@ class TTS:
 
         if os.path.exists('/tmp/temp_media/') == False:
             os.mkdir('/tmp/temp_media/')
+        try:
+            if os.path.exists('modules/obadpsasystem/bed_music') == False:
+                os.mkdir('modules/obadpsasystem/bed_music')
+        except Exception as e:
+            # Failover to no bed music if we can find it.
+            self.bg_supported = False
+            pass
 
-        if os.path.exists('modules/obadpsasystem/bed_music') == False:
-            os.mkdir('modules/obadpsasystem/bed_music')
+        
 
     # Method to call the aws Polly service, get audio, and save it using ffmpeg.
 
     def gen(self, text, music_bed_track=None, music_bed_track_volume=12):
-        if music_bed_track == None:
+        if music_bed_track == None or music_bed_track == "None":
             music = False
         else:
             music = True
+
+        if self.bg_supported== False:
+            music = False
 
         # spliting text into mutiplie requests as needed.
 
