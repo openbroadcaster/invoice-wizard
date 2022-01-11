@@ -1387,18 +1387,23 @@ OBModules.OBAdPSASystemModule = new function()
     }, 500);
     OB.API.post('obadpsadsystemmodule', 'get_all_devices', {}, function(res) {
       //console.log(res.data);
-      let json_data = JSON.parse(res.data);
-      //console.log(json_data);
-      json_data.forEach((device) => {
-        console.log(device.name);
-        let device_id = device.id;
-        let device_name = device.name;
-        let stations_select = document.getElementById("stations");
-        let option = document.createElement("option");
-        option.text = device_name;
-        option.value = device_id;
-        stations_select.add(option);
-      });
+      if (res.status) {
+        let json_data = JSON.parse(res.data);
+        //console.log(json_data);
+        json_data.forEach((device) => {
+          console.log(device.name);
+          let device_id = device.id;
+          let device_name = device.name;
+          let stations_select = document.getElementById("stations");
+          let option = document.createElement("option");
+          option.text = device_name;
+          option.value = device_id;
+          stations_select.add(option);
+        });
+      } else {
+        $('#ad_psa_system_status_message').obWidget('error', res.msg);
+        OBModules.OBAdPSASystemModule.disable_all_btns();
+      }
     });
     OB.API.post('obadpsadsystemmodule', 'get_advertisers', {}, function(res) {
       res.data.forEach((advertiser) => {
