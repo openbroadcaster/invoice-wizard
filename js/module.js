@@ -78,6 +78,26 @@ OBModules.OBAdPSASystemModule = new function()
      OB.UI.addSubMenuItem('ad_system', 'logs', 'ad_psa_system_view_logs', OBModules.OBAdPSASystemModule.view_logs, 1);
   }
 
+  // Disables all buttons in the wizard (Doesn't include modals).
+  this.disable_all_btns = function() {
+    let btns = document.querySelectorAll('#layout_main_container button');
+    for (let i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+    }
+  }
+
+  this.disable_modal_btns = function(exclude=null) {
+    let btns = document.querySelectorAll('#layout_modal_window button');
+    for (let i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+    }
+
+    if (exclude !== null) {
+      document.querySelector(`#layout_modal_window ${exclude}`).disabled = false;
+    }
+
+  }
+
   // Opens the logs view.
 
   this.view_logs = function()
@@ -419,18 +439,23 @@ OBModules.OBAdPSASystemModule = new function()
     OBModules.OBAdPSASystemModule.set_data('current_company_id', id);
     OB.UI.openModalWindow('modules/obadpsasystem/edit_company.html');
     setTimeout(() => {
+      /* Fix the modal msg div id later. */
       OB.API.post('obadpsadsystemmodule', 'get_all_devices', {}, function(res) {
-        let json_data = JSON.parse(res.data);
-        json_data.forEach((device) => {
-          console.log(device.name);
-          let device_id = device.id;
-          let device_name = device.name;
-          let stations_select = document.getElementById("player_devices");
-          let option = document.createElement("option");
-          option.text = device_name;
-          option.value = device_id;
-          stations_select.add(option);
-        });
+        if (res.status) {
+          let json_data = JSON.parse(res.data);
+          json_data.forEach((device) => {
+            console.log(device.name);
+            let device_id = device.id;
+            let device_name = device.name;
+            let stations_select = document.getElementById("player_devices");
+            let option = document.createElement("option");
+            option.text = device_name;
+            option.value = device_id;
+            stations_select.add(option);
+          });
+        } else {
+          $('#ad_psa_system_status_message').obWidget('error', res.msg);
+        }
       });
     }, 200);
     setTimeout(() => {
@@ -696,18 +721,23 @@ OBModules.OBAdPSASystemModule = new function()
     setTimeout(() => {
       OB.API.post('obadpsadsystemmodule', 'get_all_devices', {}, function(res) {
         //console.log(res.data);
-        let json_data = JSON.parse(res.data);
-        //console.log(json_data);
-        json_data.forEach((device) => {
-          console.log(device.name);
-          let device_id = device.id;
-          let device_name = device.name;
-          let stations_select = document.getElementById("player_devices");
-          let option = document.createElement("option");
-          option.text = device_name;
-          option.value = device_id;
-          stations_select.add(option);
-        });
+        if (res.status) {
+          let json_data = JSON.parse(res.data);
+          //console.log(json_data);
+          json_data.forEach((device) => {
+            console.log(device.name);
+            let device_id = device.id;
+            let device_name = device.name;
+            let stations_select = document.getElementById("player_devices");
+            let option = document.createElement("option");
+            option.text = device_name;
+            option.value = device_id;
+            stations_select.add(option);
+          });
+        } else {
+          $('#ad_psa_system_modal_status_message').obWidget('error', res.msg);
+          OBModules.OBAdPSASystemModule.disable_modal_btns(exclude='.edit');
+        }
       });
     }, 500);
   }
@@ -1920,10 +1950,11 @@ OBModules.OBAdPSASystemModule = new function()
     }, function(res) {
       console.log(res);
       if (res.status) {
-        $('#layout_main_container').html('Your message has been submitted.<br>Thank you for using the media/invoice wizard.\
-          <br>You should now be able to view your media in the slidebar.');
+        console.log('test');
+        document.getElementById('layout_main_container').innerHTML = 'Your message has been submitted.<br>Thank you for using the media/invoice wizard.\
+          <br>You should now be able to view your media in the slidebar.';
       } else {
-        $('#layout_main_container').html('Your invoice couldn\'t be submited. If the issue continues please contact the server admin.');
+        document.getElementById('layout_main_container').innerHTML = 'Your invoice couldn\'t be submited. If the issue continues please contact the server admin.';
       }
     });
   }
