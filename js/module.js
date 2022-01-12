@@ -1574,6 +1574,7 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.media_upload = function()
   {
+    OB.UI.openModalWindow('modules/obadpsasystem/media_loader.html');
     $.ajax({
       url: '/upload.php',
       type: 'POST',
@@ -1587,6 +1588,7 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.media_upload_done = function(xhr)
   {
+    OB.UI.closeModalWindow();
     var response = $.parseJSON(xhr.responseText);
     OBModules.OBAdPSASystemModule.media = response;
     let media = OBModules.OBAdPSASystemModule.media;

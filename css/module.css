@@ -1,3 +1,5 @@
+@import url("loaders.css");
+
 .invoice-form-card {
 	background-color: #555753;
 	padding: 24px;
@@ -274,4 +276,12 @@ MIT Licensed
 	max-width: 100%;
 	overflow-x: scroll;
 	overflow-y: hidden;
+}
+
+.modal-center-items {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
