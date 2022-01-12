@@ -1945,6 +1945,8 @@ OBModules.OBAdPSASystemModule = new function()
     let media_id = OBModules.OBAdPSASystemModule.get_data('current_media_id');
     let campaign_notes = OBModules.OBAdPSASystemModule.get_data('campaign_notes');
 
+    document.getElementById('layout_main_container').innerHTML = '<div class="center-items"><h1>Your campaign is being submitted.</h1>    <div class="loader-inner ball-pulse"><div></div><div></div><div></div></div>\
+    <p>Please do not close this tab. Thank you.</p></div>';
 
     OB.API.post('obadpsadsystemmodule', 'create_invoice', {
       'advertiser': advertiser, 'billing_mailing_address': address,
