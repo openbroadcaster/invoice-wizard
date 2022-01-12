@@ -278,7 +278,7 @@ MIT Licensed
 	overflow-y: hidden;
 }
 
-.modal-center-items {
+.center-items {
   display: flex;
   flex-direction: column;
   justify-content: center;
