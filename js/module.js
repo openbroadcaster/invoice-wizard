@@ -26,6 +26,7 @@ OBModules.OBAdPSASystemModule = new function()
      this.bill_to_fields = [];
      this.broadcast_data = [];
      this.media = {};
+     this.disable_checks = false;
      OB.Callbacks.add('ready',0,OBModules.OBAdPSASystemModule.initMenu);
      OB.API.post('obadpsadsystemmodule', 'start_payment', {
        'currency': 'usd', 'amount': 500
@@ -1378,6 +1379,15 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.start_page_data_init = function()
   {
+    let layout_main = document.getElementById('layout_main_container');
+    layout_main.addEventListener('mouseleave', e => {
+        OBModules.OBAdPSASystemModule.disable_checks = true;
+      e.preventDefault();
+    });
+    layout_main.addEventListener('mouseenter', e => {
+      OBModules.OBAdPSASystemModule.disable_checks = false;
+      e.preventDefault();
+    });
     //setTimeout(OBModules.OBAdPSASystemModule.load_buyers, 100);
     setTimeout(() => {
       document.getElementById('start_date').value = OBModules.OBAdPSASystemModule.get_date(now=true);
@@ -1992,6 +2002,9 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.fields_check = function(next_page)
   {
+    if (OBModules.OBAdPSASystemModule.disable_checks) {
+      return;
+    }
     let data = [];
     for (var i = 0; i < OBModules.OBAdPSASystemModule.fields.length; i++) {
         let feild = OBModules.OBAdPSASystemModule.fields[i];
@@ -2023,7 +2036,7 @@ OBModules.OBAdPSASystemModule = new function()
         }
       });
     }
-  }
+}
 
   this.review1_fill = function()
   {
