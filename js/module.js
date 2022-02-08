@@ -1276,7 +1276,12 @@ OBModules.OBAdPSASystemModule = new function()
             }
           } else if (dom_ele == 'default_language' || dom_ele == 'default_language_sets') {
             if (dom_ele == 'default_language_sets') { dom_ele = 'language_sets'; }
-            OBModules.OBAdPSASystemModule.fill_dropdown(dom_ele, res.data);
+            console.log('language_sets', res.data);
+            let language_set_items = res.data.split(',');
+            language_set_items.forEach(item => {
+              console.log('item', item);
+              OBModules.OBAdPSASystemModule.fill_dropdown(dom_ele, res.data);
+            });
           } else {
             document.getElementById(dom_ele).value = res.data;
           }
@@ -1285,6 +1290,8 @@ OBModules.OBAdPSASystemModule = new function()
         }
       });
     }
+    // Handles first load of language sets.
+    OBModules.OBAdPSASystemModule.language_selected();
   }
 
   // Displays Module settings
