@@ -1269,21 +1269,22 @@ OBModules.OBAdPSASystemModule = new function()
       OB.API.post('obadpsadsystemmodule', 'get_setting', {'setting_name': settings_name[i]}, function(res) {
         // Added to catch error if the add conpany modal is closed.
         try {
-          if (dom_ele == 'default_country') {
+          if (dom_ele == 'default_language_sets') {
+            dom_ele = 'language_sets';
+            let language_set_items = res.data.split(',');
+            console.log('language_set_items', language_set_items);
+            OBModules.OBAdPSASystemModule.add_dropdown_items(dom_ele, language_set_items);
+            language_set_items.forEach(item => {
+              OBModules.OBAdPSASystemModule.fill_dropdown(dom_ele, item);
+            });
+          } else {
+            document.getElementById(dom_ele).value = res.data;
+          }
+          if (dom_ele == 'default_country' || dom_ele == 'default_language' || dom_ele == 'default_language') {
             if (res.data != '') {
               document.getElementById(dom_ele).value = res.data;
               OBModules.OBAdPSASystemModule.fill_dropdown(dom_ele, res.data);
             }
-          } else if (dom_ele == 'default_language' || dom_ele == 'default_language_sets') {
-            if (dom_ele == 'default_language_sets') { dom_ele = 'language_sets'; }
-            console.log('language_sets', res.data);
-            let language_set_items = res.data.split(',');
-            language_set_items.forEach(item => {
-              console.log('item', item);
-              OBModules.OBAdPSASystemModule.fill_dropdown(dom_ele, res.data);
-            });
-          } else {
-            document.getElementById(dom_ele).value = res.data;
           }
         } catch (e) {
           console.log(`Not displaying settings ${dom_ele}, due to the add conpany modal being closed.`);
@@ -1523,6 +1524,19 @@ OBModules.OBAdPSASystemModule = new function()
       if (item.value == dropdown_value) {
         item.selected = true;
       }
+    });
+    if (disable_after_fill) {
+      dropdown_items.disabled = true;
+    }
+  }
+
+  this.add_dropdown_items = function (dropdown, items, disable_after_fill = false) {
+    let dropdown_ele = document.getElementById(dropdown);
+    items.forEach((item) => {
+      let option_ele = document.createElement('option');
+      option_ele.value = item;
+      option_ele.innerHTML = item;
+      dropdown_ele.appendChild(option_ele);
     });
     if (disable_after_fill) {
       dropdown_items.disabled = true;
