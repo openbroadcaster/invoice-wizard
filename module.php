@@ -28,6 +28,12 @@ class OBAdPSASystemModule extends OBFModule
 
 	public function install()
 	{
+		// Check for the background music folder. If it's not found, then we will create it below.
+		$bg_folder = "modules/obadpsasystem/bed_music";
+		if (is_dir($bg_folder) === false) {
+			exec("mkdir -p ". $bg_folder. " 2>&1", $output, $return_val);
+		}
+
 		$this->db->query('CREATE TABLE IF NOT EXISTS `module_ad_system_messages` (
 		`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 	  `file_id` text NOT NULL,
