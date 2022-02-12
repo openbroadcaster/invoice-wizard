@@ -1630,6 +1630,7 @@ OBModules.OBAdPSASystemModule = new function()
     let ad_id = document.getElementById('ad_id').value;
     let message_type = document.getElementById('message_type').value;
     let country = document.getElementById('country').value;
+    let language = document.getElementById('language').value;
     let has_ad_id = document.getElementById('has_ad_id').checked;
     if (has_ad_id != false) {
       ad_id = document.getElementById('ad_id').value;
@@ -1639,7 +1640,7 @@ OBModules.OBAdPSASystemModule = new function()
     }
 
     let values = {'file_key': file_key, 'file_id': file_id, 'id': id, 'spot_name': creative,
-                  'ad_id': ad_id, 'message_type': message_type, 'has_ad_id': has_ad_id, 'country': country};
+                  'ad_id': ad_id, 'message_type': message_type, 'has_ad_id': has_ad_id, 'country': country, 'language': language};
     OB.API.post('obadpsadsystemmodule', 'save_media', values, function(res) {
       console.log(res);
       // Check if media was uploaded without error, else display a error.
