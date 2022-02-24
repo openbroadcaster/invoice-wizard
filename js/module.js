@@ -2099,7 +2099,7 @@ OBModules.OBAdPSASystemModule = new function()
       if (field == 'media_type') {
         let value = OBModules.OBAdPSASystemModule.get_data(field);
         console.log('value', value);
-        if (value == 0) {
+        if (value == 1) {
           document.getElementById(field).innerHTML = 'Uploaded Media';
         } else {
           document.getElementById(field).innerHTML = 'TTS audio';
