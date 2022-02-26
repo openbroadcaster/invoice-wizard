@@ -1994,8 +1994,9 @@ OBModules.OBAdPSASystemModule = new function()
       console.log(res);
       if (res.status) {
         console.log('test');
-        document.getElementById('layout_main_container').innerHTML = 'Your message has been submitted.<br>Thank you for using the media/invoice wizard.\
-          <br>You should now be able to view your media in the slidebar.';
+        document.getElementById('layout_main_container').innerHTML = '<div class="center-items"><h1>Your campaign has been submitted!</h1>\
+          <p>Your message has been submitted.<br>Thank you for using the media/invoice wizard.\
+          <br>You should now be able to view your media in the slidebar.</p></div';
       } else {
         document.getElementById('layout_main_container').innerHTML = 'Your invoice couldn\'t be submited. If the issue continues please contact the server admin.';
       }
