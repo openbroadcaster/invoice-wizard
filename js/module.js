@@ -1977,6 +1977,7 @@ OBModules.OBAdPSASystemModule = new function()
     let contract_number = OBModules.OBAdPSASystemModule.get_data('contract_number');
     let media_id = OBModules.OBAdPSASystemModule.get_data('current_media_id');
     let campaign_notes = OBModules.OBAdPSASystemModule.get_data('campaign_notes');
+    let media_type = OBModules.OBAdPSASystemModule.get_data('media_type');
 
     document.getElementById('layout_main_container').innerHTML = '<div class="center-items"><h1>Your campaign is being submitted.</h1>    <div class="loader-inner ball-pulse"><div></div><div></div><div></div></div>\
     <p>Please do not close this tab. Thank you.</p></div>';
@@ -1985,7 +1986,7 @@ OBModules.OBAdPSASystemModule = new function()
       'advertiser': advertiser, 'billing_mailing_address': address,
       'billing_mailing_city': city, 'billing_mailing_state_prov': state_prov, 'billing_mailing_zip_code': zip_code,
       'billing_email': bill_to_email, 'devices': '1',
-      'creative': creative, 'ad_id': ad_id, 'time_slots': time_slots, 'media_type': 2, 'media_file_id': 'TEST',
+      'creative': creative, 'ad_id': ad_id, 'time_slots': time_slots, 'media_type': media_type, 'media_file_id': 'TEST',
       'billing_mailing_country' : country, 'revenue_type': revenue_type,
       'start_date': start_date, 'stop_date': stop_date, 'campaign_name': campaign_name, 'buyer': buyer,
       'contract_number': contract_number, 'media_file_id': media_id, 'campaign_notes': campaign_notes
