@@ -243,10 +243,10 @@ class OBAdPSADSystemModule extends OBFController
                       'invoice_date' => date('M. d, Y'), 'invoice_number' => $this->get_next_invoice_number(), 'campaign_notes' => $campaign_notes];
       $this->AdsModel->add_new_ad($media_data, $invoice_data);
       $this->log('create_invoice', 'Invoice created!');
-      return [true, ''];
+      return [true, 'Invoice created!'];
     } catch (\Exception $e) {
       $this->log('create_invoice', 'The invoice couldn\'t be saved!');
-      return [false, ''];
+      return [false, 'The invoice couldn\'t be saved!', $e];
     }
   }
 
