@@ -71,6 +71,7 @@ class OBAdPSASystemModule extends OBFModule
 		`buyer_id` int NOT NULL,
 		`invoice_number` TEXT NOT NULL,
 		`campaign_notes` TEXT NOT NULL,
+		`sales_rep` TEXT NOT NULL,
 		PRIMARY KEY (`id`)
 	) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;');
 	$this->db->query('CREATE TABLE IF NOT EXISTS `module_ad_system_companies` (
