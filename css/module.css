@@ -273,7 +273,7 @@ MIT Licensed
 	background-color: #fff;
 	color: #000;
 	padding: 24px;
-	max-width: 100%;
+	width: 20%;
 	overflow-x: scroll;
 	overflow-y: hidden;
 }
