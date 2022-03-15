@@ -285,3 +285,7 @@ MIT Licensed
   align-items: center;
   text-align: center;
 }
+
+.flex_row {
+  display: flex;
+}
