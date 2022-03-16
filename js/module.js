@@ -1646,6 +1646,8 @@ OBModules.OBAdPSASystemModule = new function()
       // Check if media was uploaded without error, else display a error.
       if (res.status) {
         $('#ad_psa_system_status_message').obWidget('success', "Your AD/PSA is uploaded. Do not exit the wizard!");
+        // Reload the media sidebar after the upload is saved.
+        OB.Sidebar.mediaSearch();
         OBModules.OBAdPSASystemModule.enable_next_btn();
       } else {
         $('#ad_psa_system_status_message').obWidget('error', "Your AD/PSA couldn't be uploaded. Please contact a server admin.");
