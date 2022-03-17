@@ -1893,6 +1893,8 @@ OBModules.OBAdPSASystemModule = new function()
         OBModules.OBAdPSASystemModule.set_data('bill_to_email', bill_to_email);
         let country = document.getElementById('country').value;
         OBModules.OBAdPSASystemModule.set_data('country', country);
+        let sales_rep = document.getElementById('sales_rep').value;
+        OBModules.OBAdPSASystemModule.set_data('sales_rep', sales_rep);
         let stations = $('#stations').val();
         let stations_str = '';
         if (stations.length > 1) {
@@ -1980,6 +1982,7 @@ OBModules.OBAdPSASystemModule = new function()
     let media_id = OBModules.OBAdPSASystemModule.get_data('current_media_id');
     let campaign_notes = OBModules.OBAdPSASystemModule.get_data('campaign_notes');
     let media_type = OBModules.OBAdPSASystemModule.get_data('media_type');
+    let sales_rep = OBModules.OBAdPSASystemModule.get_data('sales_rep');
 
     document.getElementById('layout_main_container').innerHTML = '<div class="center-items"><h1>Your campaign is being submitted.</h1>    <div class="loader-inner ball-pulse"><div></div><div></div><div></div></div>\
     <p>Please do not close this tab. Thank you.</p></div>';
@@ -1991,7 +1994,7 @@ OBModules.OBAdPSASystemModule = new function()
       'creative': creative, 'ad_id': ad_id, 'time_slots': time_slots, 'media_type': media_type, 'media_file_id': 'TEST',
       'billing_mailing_country' : country, 'revenue_type': revenue_type,
       'start_date': start_date, 'stop_date': stop_date, 'campaign_name': campaign_name, 'buyer': buyer,
-      'contract_number': contract_number, 'media_file_id': media_id, 'campaign_notes': campaign_notes
+      'contract_number': contract_number, 'media_file_id': media_id, 'campaign_notes': campaign_notes, 'sales_rep': sales_rep
     }, function(res) {
       console.log(res);
       if (res.status) {
