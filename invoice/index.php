@@ -57,6 +57,8 @@ if ($invoice_data == null) {
 
 ?>
 
+<?php print_r($invoice_data); ?>
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
