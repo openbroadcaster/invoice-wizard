@@ -2307,8 +2307,10 @@ OBModules.OBAdPSASystemModule = new function()
 
     if (is_checked) {
       ad_id_ele.style.visibility = 'hidden';
+      OBModules.OBAdPSASystemModule.set_data('has_ad_id', false);
     } else {
       ad_id_ele.style.visibility = 'visible';
+      OBModules.OBAdPSASystemModule.set_data('has_ad_id', true);
     }
   }
 
