@@ -68,7 +68,7 @@ class OBAdPSADSystemModule extends OBFController
         return [false, "Failed to upload the audio! Please enter a Ad-ID first.", null];
       }
     } else {
-      $ad_id = 'null';
+      $ad_id = 'N/A';
     }
     if ($message_type == 'ad') {
       // For now as a workaround to allow for the media to be in ad/psa category the ad message will
