@@ -250,6 +250,12 @@ PRIMARY KEY (`id`)
 		$this->db->insert('settings', ['name'=>'ad_psa_system_settings_enabled_languages', 'value' => '[{"english":false},{"chinese_mandarin":false},{"dutch":false},{"french":false},{"german":false},{"italian":false},{"portuguese":false},{"spanish":false}]']);
 	}
 
+	$this->db->where('name','ad_psa_system_settings_gst_number');
+
+	if(!$this->db->get_one('settings')) {
+		$this->db->insert('settings', ['name'=>'ad_psa_system_settings_gst_number', 'value' => '...']);
+	}
+
 	// Add needed permissons.
 
 	$data = array();
