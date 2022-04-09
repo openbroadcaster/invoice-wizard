@@ -101,6 +101,10 @@
 		<select class="" name="language_sets" id="language_sets" multiple onchange="OBModules.OBAdPSASystemModule.language_subset_selected();">
 		</select>
 	</div>
+	<div class="fieldrow">
+		<label for="enabled_sets">HST</label>
+		<input type="text" id="hst_number">
+	</div>
 	<label for="enabled_sets">Enabled Languages</label>
 	<hr>
 	<div class="fieldrow">
@@ -139,6 +143,5 @@
 		<label for="enabled_sets">Spanish</label>
 		<input type="checkbox" id="Spanish_checkbox" value="Spanish" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
 	</div>
-
 	<button onclick="OBModules.OBAdPSASystemModule.save_settings();">Save</button>
 </fieldset>
