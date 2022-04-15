@@ -253,7 +253,7 @@ PRIMARY KEY (`id`)
 	$this->db->where('name','ad_psa_system_settings_gst_number');
 
 	if(!$this->db->get_one('settings')) {
-		$this->db->insert('settings', ['name'=>'ad_psa_system_settings_gst_number', 'value' => '...']);
+		$this->db->insert('settings', ['name'=>'ad_psa_system_settings_hst_number', 'value' => '']);
 	}
 
 	// Add needed permissons.

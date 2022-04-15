@@ -1122,7 +1122,7 @@ OBModules.OBAdPSASystemModule = new function()
     let default_language = OBModules.OBAdPSASystemModule.get_data('default_language');
     let default_language_subsets = OBModules.OBAdPSASystemModule.get_data('language_sets');
     let enabled_languages = OBModules.OBAdPSASystemModule.get_data('enabled_languages');
-    let gst_number = document.getElementById('gst').value;
+    let hst_number = document.getElementById('hst_number').value;
     console.log('Saving settings...');
     OB.API.post('obadpsadsystemmodule', 'update_setting', {'setting_name': 'aws_region_name', 'setting_value': aws_region_name}, function(res) {
       console.log(res);
@@ -1180,7 +1180,7 @@ OBModules.OBAdPSASystemModule = new function()
       console.log(res);
       $('#ad_psa_system_settings_message').obWidget(res.status ? 'success' : 'error', res.msg);
     });
-    OB.API.post('obadpsadsystemmodule', 'update_setting', {'setting_name': 'gst_number', 'setting_value': gst_number}, function(res) {
+    OB.API.post('obadpsadsystemmodule', 'update_setting', {'setting_name': 'hst_number', 'setting_value': hst_number}, function(res) {
       console.log(res);
       $('#ad_psa_system_settings_message').obWidget(res.status ? 'success' : 'error', res.msg);
     });
@@ -1267,7 +1267,8 @@ OBModules.OBAdPSASystemModule = new function()
                         'company_phone', 'company_street_address', 'company_state_prov', 'company_city',
                         'company_zip_code', 'company_country', 'morning_hourly_rate',
                         'midday_hourly_rate', 'drive_hourly_rate', 'ros_hourly_rate',
-                        'default_country', 'default_language', 'default_language', 'default_language_sets'];
+                        'default_country', 'default_language', 'default_language', 'default_language_sets',
+                        'hst_number'];
 
     for (var i = 0; i < settings_name.length; i++) {
       let dom_ele = settings_name[i];
