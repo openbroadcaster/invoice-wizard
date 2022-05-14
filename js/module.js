@@ -2246,6 +2246,7 @@ OBModules.OBAdPSASystemModule = new function()
            start_payment_init();
          } else if (page == 'media_info.html') {
            OBModules.OBAdPSASystemModule.media_data_init();
+           OBModules.OBAdPSASystemModule.tts_voice_init();
          }
 
          if (page == 'review1.html') {
