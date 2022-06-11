@@ -39,7 +39,7 @@ $invoice_data = $InvoicesModel->get_invoice($invoice_id);
 // $from_company_zip_code = $SettingsModel->get_setting('company_zip_code');
 // $from_company_country = $SettingsModel->get_setting('company_country');
 // $from_company_phone = $SettingsModel->get_setting('company_phone');
-$from_company_logo = '../temp_media/station_logo.jpeg';
+//$from_company_logo = '../temp_media/station_logo.jpeg';
 
 // $from_company_id = $invoice_data['companie_id'];
 // $from_company_data = $CompanyModel->get_one($from_company_id);
@@ -50,6 +50,8 @@ $from_company_state_prov = $SettingsModel->get_setting('company_state_prov');
 $from_company_zip_code = $SettingsModel->get_setting('company_zip_code');
 $from_company_country = $SettingsModel->get_setting('company_country');
 $from_company_phone = $SettingsModel->get_setting('company_phone');
+
+$station_logo = $SettingsModel->get_setting('station_logo');
 
 if ($invoice_data == null) {
   die('Invaild invoice id!');
@@ -78,7 +80,7 @@ if ($invoice_data == null) {
             <?php print($from_company_country); ?>
           </pre>
         </div>
-        <img src="<?php echo $from_company_logo; ?>" alt="station logo" class="station-logo">
+        <img src="../../../preview.php?id=<?php echo $station_logo; ?>" alt="station logo" class="station-logo">
         <p>We warrant that the broadcast information shown on this invoice was taken
 from the program logs</p>
         <div class="top-right">
