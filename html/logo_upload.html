@@ -1,10 +1,46 @@
 <h1>Upload invoice logo</h1>
 <obwidget type="message" id="ad_psa_system_logo_upload_status_message"></obwidget>
 <fieldset>
-  <div class="fieldrow">
+  <!-- <div class="fieldrow">
     <label for="file">Logo file</label>
     <input type="file" id="logo_file" accept="image/jpeg, image/x-png" required>
+  </div> -->
+  <div class="fieldrow">
+    <span id="station_logo" class="ui-droppable">
+      Drag and drop logo media item here...
+    </span>
   </div>
   <button type="button" onclick="OBModules.OBAdPSASystemModule.save_logo_btn_clicked();">Save</button>
   <button type="button" onclick="OB.UI.closeModalWindow();">Close</button>
 </fieldset>
+<script>
+  $('#station_logo').droppable({
+        drop: function(event, ui) {
+        console.log("event");
+
+        if($(ui.draggable).attr('data-mode')=='media')
+        {
+          $('.sidebar_search_media_selected').each(function(index,element) {
+
+            if($(element).attr('data-visibility')=='private' && ($(element).attr('data-owner_id')!=playlist_owner_id))
+            {
+              private_media_alert = true;
+              return true;
+            }
+
+            if($(element).attr('data-type')=='image') var insert_duration = 15;
+            else var insert_duration = $(element).attr('data-duration');
+
+            OB.Playlist.addeditInsertItem($(element).attr('data-id'),$(element).attr('data-artist')+' - '+$(element).attr('data-title'),insert_duration,$(element).attr('data-type'));
+          });
+
+          //T A media item is marked as private. It can only be used in playlists created by the same owner.
+          if(private_media_alert) OB.UI.alert('A media item is marked as private. It can only be used in playlists created by the same owner.');
+
+          // unselect our media from our sidebar
+          OB.Sidebar.mediaSelectNone();
+
+        }
+      }
+    });
+ </script>
