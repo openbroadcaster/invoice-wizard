@@ -1621,9 +1621,9 @@ OBModules.OBAdPSASystemModule = new function()
             item.title = $(ui.draggable).attr('data-title');
             item.artist = $(ui.draggable).attr('data-artist');
             console.log('item', item);
-            OB.API.post('obadpsadsystemmodule', 'update_setting', {'setting_name': 'ad_psa_system_settings_station_logo', 'setting_value': item.id}, function(res) {
+            OB.API.post('obadpsadsystemmodule', 'update_setting', {'setting_name': 'station_logo', 'setting_value': item.id}, function(res) {
               console.log(res);
-              if (res.status == 'success') {
+              if (res.status) {
                 $('#ad_psa_system_settings_message').obWidget('success', "Your logo has been saved!");
               } else {
                 $('#ad_psa_system_settings_message').obWidget('error', "Couldn't save your selected system/station logo. Please try again.");
