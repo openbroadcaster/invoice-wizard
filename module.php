@@ -256,6 +256,13 @@ PRIMARY KEY (`id`)
 		$this->db->insert('settings', ['name'=>'ad_psa_system_settings_hst_number', 'value' => '']);
 	}
 
+	// Stores media id number for invoices.
+	$this->db->where('name','ad_psa_system_settings_station_logo');
+
+	if(!$this->db->get_one('settings')) {
+		$this->db->insert('settings', ['name'=>'ad_psa_system_settings_station_logo', 'value' => '']);
+	}
+
 	// Add needed permissons.
 
 	$data = array();

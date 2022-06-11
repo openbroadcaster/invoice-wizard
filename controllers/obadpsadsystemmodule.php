@@ -137,25 +137,9 @@ class OBAdPSADSystemModule extends OBFController
 
   public function save_station_logo()
   {
-    $input_file = $this->data('data');
-    $convert = true;
-    // Check if file is a suported format.
-    switch ($input_file['type']) {
-      case 'image/jpeg':
-        $convert = false;
-        break;
 
-      case 'image/png':
-        $convert = true;
-        break;
+    $media_id = $this->data('media-id');
 
-      default:
-        return [false, 'You submited a invaild file format! Please use a png, or jpeg file.', null];
-        break;
-    }
-    $status_data = $this->store_image($input_file, $convert);
-    $status = $status_data[0];
-    $status_msg = $status_data[1];
     // $file = fopen('modules/obadpsasystem/temp_media/'. $file_name, "w");
     // if ($file == false) {
     //   return [false, 'Couln\'t submit your image! Please try again later.', ''];

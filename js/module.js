@@ -1597,15 +1597,40 @@ OBModules.OBAdPSASystemModule = new function()
   // Handles the save logo button being clicked.
   // it then uploads the logo.
 
-  this.save_logo_btn_clicked = function()
+  // Old to be removed.
+  // this.save_logo_btn_clicked = function()
+  // {
+  //   let logo_file = document.getElementById('logo_file');
+  //   let file_path = logo_file.value;
+  //   // Based on the code from https://stackoverflow.com/questions/423376/how-to-get-the-file-name-from-a-full-path-using-javascript
+  //   let filename = file_path.replace(/^.*[\\\/]/, '')
+  //   OB.API.post('obadpsadsystemmodule', 'save_station_logo', {'data': $('#logo_file')[0].files[0]}, function(res) {
+  //     console.log(res);
+  //     $('#ad_psa_system_logo_upload_status_message').obWidget(res.status ? 'success' : 'error', res.msg);
+  //   });
+  // }
+
+  this.station_logo_init = function()
   {
-    let logo_file = document.getElementById('logo_file');
-    let file_path = logo_file.value;
-    // Based on the code from https://stackoverflow.com/questions/423376/how-to-get-the-file-name-from-a-full-path-using-javascript
-    let filename = file_path.replace(/^.*[\\\/]/, '')
-    OB.API.post('obadpsadsystemmodule', 'save_station_logo', {'data': $('#logo_file')[0].files[0]}, function(res) {
-      console.log(res);
-      $('#ad_psa_system_logo_upload_status_message').obWidget(res.status ? 'success' : 'error', res.msg);
+      $('#station_logo').droppable({
+        drop: function(event, ui) {
+          if($(ui.draggable).attr('data-mode')=='media') {
+            var item = {};
+            console.log($(ui.draggable));
+            item.id = $(ui.draggable).attr('data-id');
+            item.title = $(ui.draggable).attr('data-title');
+            item.artist = $(ui.draggable).attr('data-artist');
+            console.log('item', item);
+            OB.API.post('obadpsadsystemmodule', 'update_setting', {'setting_name': 'ad_psa_system_settings_station_logo', 'setting_value': item.id}, function(res) {
+              console.log(res);
+              if (res.status == 'success') {
+                $('#ad_psa_system_settings_message').obWidget('success', "Your logo has been saved!");
+              } else {
+                $('#ad_psa_system_settings_message').obWidget('error', "Couldn't save your selected system/station logo. Please try again.");
+              }
+            });
+          }
+        }
     });
   }
 
