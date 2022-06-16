@@ -65,7 +65,7 @@ function check_a_z_0_9_dashes_quotes($value) {
 
 function check_zip_code($value) {
   if (! preg_match('/^[0-9][0-9][0-9][0-9][0-9]$/', $value)) {
-    if (! preg_match('/^[A-Za-z0-9]+$/', $value)) {
+    if (! preg_match('/^[A-Za-z0-9 ]+$/', $value)) {
       if (strlen($value) > 10) {
         return 'The zip / postal code is to long! Must be a vaild zip/postal code';
       }
