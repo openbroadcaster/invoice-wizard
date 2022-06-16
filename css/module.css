@@ -289,3 +289,8 @@ MIT Licensed
 .flex_row {
   display: flex;
 }
+
+#station_logo {
+  border: 4px solid red;
+  padding: 64px;
+}
