@@ -28,11 +28,12 @@ OBModules.OBAdPSASystemModule = new function()
      this.media = {};
      this.disable_checks = false;
      OB.Callbacks.add('ready',0,OBModules.OBAdPSASystemModule.initMenu);
-     OB.API.post('obadpsadsystemmodule', 'start_payment', {
-       'currency': 'usd', 'amount': 500
-     }, function(res) {
-       console.log(res.data);
-     });
+    // TODO: Fix the issue with this api entpoint.
+    //  OB.API.post('obadpsadsystemmodule', 'start_payment', {
+    //    'currency': 'usd', 'amount': 500
+    //  }, function(res) {
+    //    console.log(res.data);
+    //  });
    }
 
  	this.initMenu = function()
