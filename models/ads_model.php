@@ -18,7 +18,7 @@ class AdsModel extends OBFModel
   {
     $this->db->orderby($sort_col, $sort_dir);
     $data = $this->db->get('module_ad_system_invoices');
-    if (count($data) > 0) {
+    if ($data != null && count($data) > 0) {
       return $data;
     } else {
       return false;
