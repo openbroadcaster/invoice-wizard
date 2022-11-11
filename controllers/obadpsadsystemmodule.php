@@ -214,6 +214,7 @@ class OBAdPSADSystemModule extends OBFController
       $revenue_type = $this->data('revenue_type');
       $contract_number = $this->data('contract_number');
       $campaign_notes = $this->data('campaign_notes');
+      if ($campaign_notes == null) $campaign_notes = "No notes was provided.";
       $media_data = ['file_id' => $media_file_id, 'invoices' => $invoice_id, 'time_slots' => $time_slots, 'devices' => implode(',', $player_names)];
       $invoice_data = ['invoice_id' => $invoice_id, 'attention_to' => $attention_to, 'advertiser' => $advertiser,
                       'billing_mailing_address' => $billing_mailing_address, 'billing_mailing_city' => $billing_mailing_city,
