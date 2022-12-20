@@ -6,7 +6,7 @@ title: index
 # InvoiceWizard
 {:.no_toc}
 
-TOC
+* TOC
 {:toc}
 
 ## Overview
