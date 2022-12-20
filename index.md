@@ -3,12 +3,10 @@ layout: default
 title: index
 ---
 
+# InvoiceWizard
+{:.no_toc}
+
 * TOC
 {:toc}
 
-## InvoiceWizard
-===========
-
 #  Manage ADs or PSA Campaigns
-
-
