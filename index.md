@@ -3,6 +3,8 @@ layout: default
 title: index
 ---
 
+![ Invoice Wizard](img/invoice-wizard.png )
+
 # InvoiceWizard
 {:.no_toc}
 
@@ -10,16 +12,6 @@ title: index
 {:toc}
 
 ## Overview
-
-## Wizard
-
-### Step 1
-
-### Step 2
-
-### Step 3
-
-### Step 4
 
 ## Media Buyers
 
@@ -34,3 +26,13 @@ title: index
 ## Configure POLLY
 
 ## Trouble Shooting
+
+## Wizard
+
+### Step 1
+
+### Step 2
+
+### Step 3
+
+### Step 4
