@@ -613,8 +613,10 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.sort_campaigns = function(sort_col)
   {
+    let table = document.getElementById('campaign_table_body');
+    table.innerHTML = '';
     localStorage.setItem('campaign_table_sortby', sort_col);
-    OBModules.OBAdPSASystemModule.load_campainins();
+    OBModules.OBAdPSASystemModule.load_campaigns();
   }
 
   // Gets the current campaigns from the server.
@@ -625,7 +627,7 @@ OBModules.OBAdPSASystemModule = new function()
     if (val != null) {
       sort_col = val;
     } else {
-      sort_col = 'name';
+      sort_col = 'id';
     }
     OB.API.post('obadpsadsystemmodule', 'get_campaigns', {'sort_col': sort_col}, function(res) {
       if (res.status) {

@@ -14,8 +14,15 @@ class AdsModel extends OBFModel
     echo $this->db->error();
   }
 
-  public function get_invoices($sort_col='name', $sort_dir='asc')
+  public function get_invoices($sort_col='id', $sort_dir='asc')
   {
+    // whitelist the sort column. an invalid value (eg a stale 'name' saved
+    // client-side) otherwise fails the entire query and returns nothing.
+    $allowed_sort = ['id', 'invoice_id', 'campaign_name', 'advertiser', 'buyer', 'start_date', 'stop_date', 'device_names', 'invoice_number', 'contract_number', 'sales_rep'];
+    if (!is_string($sort_col) || !in_array($sort_col, $allowed_sort, true)) {
+        $sort_col = 'id';
+    }
+    $sort_dir = (is_string($sort_dir) && strtolower($sort_dir) === 'desc') ? 'desc' : 'asc';
     $this->db->orderby($sort_col, $sort_dir);
     $data = $this->db->get('module_ad_system_invoices');
     if ($data != null && count($data) > 0) {

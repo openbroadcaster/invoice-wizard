@@ -1003,14 +1003,10 @@ class OBAdPSADSystemModule extends OBFController
   public function get_campaigns()
   {
     $this->user->require_permission('ad_psa_system_view_edit_remove_campaigns');
+    // sort column/direction are validated in AdsModel::get_invoices(),
+    // which is the single point of validation for both callers.
     $sort_col = $this->data('sort_col');
-    if ($sort_col == null) {
-      $sort_col = 'name';
-    }
     $sort_dir = $this->data('sort_dir');
-    if ($sort_dir == null) {
-      $sort_dir = 'asc';
-    }
     $invoices = $this->AdsModel->get_invoices($sort_col, $sort_dir);
     if ($invoices != false) {
       $this->log('get_campaigns', 'All campaigns returned');
