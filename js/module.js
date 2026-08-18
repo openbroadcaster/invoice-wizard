@@ -1678,6 +1678,8 @@ OBModules.OBAdPSASystemModule = new function()
       // Check if media was uploaded without error, else display a error.
       if (res.status) {
         $('#ad_psa_system_status_message').obWidget('success', "Your AD/PSA is uploaded. Do not exit the wizard!");
+        // store the saved media id so submit_invoice can link the creative to the campaign.
+        OBModules.OBAdPSASystemModule.set_data('current_media_id', res.data);
         // Reload the media sidebar after the upload is saved.
         OB.Sidebar.mediaSearch();
         OBModules.OBAdPSASystemModule.enable_next_btn();
@@ -1928,16 +1930,8 @@ OBModules.OBAdPSASystemModule = new function()
         let sales_rep = document.getElementById('sales_rep').value;
         OBModules.OBAdPSASystemModule.set_data('sales_rep', sales_rep);
         let stations = $('#stations').val();
-        let stations_str = '';
-        if (stations.length > 1) {
-          stations.forEach((station) => {
-            station_str = station + ',';
-            let tmp_str = stations_str.concat(stations_str, station_str);
-            stations_str = stations_str + tmp_str;
-          });
-        } else {
-          stations_str = stations;
-        }
+        // a multi-select returns an array; join to a plain comma separated list.
+        let stations_str = Array.isArray(stations) ? stations.join(',') : (stations || '');
         OBModules.OBAdPSASystemModule.set_data('stations', stations_str);
         let time_slots_values = [];
         let time_slots = Array.from(document.getElementById('time_slots').selectedOptions);
@@ -1997,7 +1991,7 @@ OBModules.OBAdPSASystemModule = new function()
     let campaign_name = OBModules.OBAdPSASystemModule.get_data('campaign_name');
     let advertiser = OBModules.OBAdPSASystemModule.get_data('advertiser');
     let address = OBModules.OBAdPSASystemModule.get_data('address');
-    let city = OBModules.OBAdPSASystemModule.set_data('city');
+    let city = OBModules.OBAdPSASystemModule.get_data('city');
     let state_prov = OBModules.OBAdPSASystemModule.get_data('state_prov');
     let zip_code = OBModules.OBAdPSASystemModule.get_data('zip_code');
     let bill_to_email = OBModules.OBAdPSASystemModule.get_data('bill_to_email');
@@ -2022,8 +2016,8 @@ OBModules.OBAdPSASystemModule = new function()
     OB.API.post('obadpsadsystemmodule', 'create_invoice', {
       'advertiser': advertiser, 'billing_mailing_address': address,
       'billing_mailing_city': city, 'billing_mailing_state_prov': state_prov, 'billing_mailing_zip_code': zip_code,
-      'billing_email': bill_to_email, 'devices': '1',
-      'creative': creative, 'ad_id': ad_id, 'time_slots': time_slots, 'media_type': media_type, 'media_file_id': 'TEST',
+      'billing_email': bill_to_email, 'devices': stations,
+      'creative': creative, 'ad_id': ad_id, 'time_slots': time_slots, 'media_type': media_type,
       'billing_mailing_country' : country, 'revenue_type': revenue_type,
       'start_date': start_date, 'stop_date': stop_date, 'campaign_name': campaign_name, 'buyer': buyer,
       'contract_number': contract_number, 'media_file_id': media_id, 'campaign_notes': campaign_notes, 'sales_rep': sales_rep

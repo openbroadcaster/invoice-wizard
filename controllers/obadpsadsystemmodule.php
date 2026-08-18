@@ -90,12 +90,19 @@ class OBAdPSADSystemModule extends OBFController
 
     $file_info = $this->uploads_model->file_info($file_id, $file_key);
     $item = array('file_id' => $file_id, 'file_key' => $file_key, 'artist' => 'AD System', 'title' => $creative, 'file_info' => $file_info, 'is_approved' => 1, 'is_copyright_owner' => 0, 'dynamic_select' => 0,'status' => 'public',
-    'category_id' => $category_id, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => 'AD/PSA Messages', 'local_id' => 1, 'country_id' => $country, 'language_id' => $language);
+    'category_id' => $category_id, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => 'AD/PSA Messages', 'local_id' => 1, 'country' => $country, 'language' => $language);
     $data = $this->media_model->validate(['item'=>$item], false);
     if ($data[0]) {
-        $this->media_model->save(['item'=>$item]);
+        $media_id = $this->media_model->save(['item'=>$item]);
+        // save() returns false when the insert fails. reporting success on a
+        // failed save is what let broken uploads go unnoticed.
+        if (!$media_id) {
+            $this->log('save_media', 'The media wasn\'t saved!');
+            return [false, 'The media wasn\'t saved!', null];
+        }
         $this->log('save_media', 'The media was uploaded!');
-        return [true, 'The media was uploaded!', null];
+        // return the new media id so the wizard can link this creative to the campaign.
+        return [true, 'The media was uploaded!', $media_id];
       } else {
         $this->log('save_media', 'The media wasn\'t uploaded!');
         return [false, 'The media wasn\'t uploaded!', $data];
@@ -189,6 +196,14 @@ class OBAdPSADSystemModule extends OBFController
       $invoice_id = $this->randKey();
       $attention_to = $this->data('attention_to');
       $advertiser = $this->data('advertiser');
+      // the advertiser select submits an id, but this table stores the display
+      // name. resolve it, falling back to whatever was submitted.
+      if (is_numeric($advertiser)) {
+          $advertiser_row = $this->advertiser_model->get_one($advertiser);
+          if (!empty($advertiser_row['name'])) {
+              $advertiser = $advertiser_row['name'];
+          }
+      }
       $billing_mailing_address = $this->data('billing_mailing_address');
       $billing_mailing_city = $this->data('billing_mailing_city');
       $billing_mailing_state_prov = $this->data('billing_mailing_state_prov');
