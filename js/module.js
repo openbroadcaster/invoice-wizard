@@ -537,7 +537,7 @@ OBModules.OBAdPSASystemModule = new function()
   this.view_campaigns = function()
   {
     OB.UI.replaceMain('modules/obadpsasystem/view_campaigns.html');
-    setTimeout(() => OBModules.OBAdPSASystemModule.load_campaigns, 800);
+    setTimeout(() => OBModules.OBAdPSASystemModule.load_campaigns(), 800);
   }
 
   // Adds a campaign to the table of campaigns.
@@ -557,8 +557,8 @@ OBModules.OBAdPSASystemModule = new function()
     let cell9 = row.insertCell(8);
 
     cell1.innerHTML = htmlspecialchars(name);
-    cell2.innerHTML = htmlspecialchars(`${start_date} ${start_time}`);
-    cell3.innerHTML = htmlspecialchars(`${stop_date} ${stop_time}`);
+    cell2.innerHTML = htmlspecialchars(start_date);
+    cell3.innerHTML = htmlspecialchars(stop_date);
     cell4.innerHTML = htmlspecialchars(buyer);
     cell5.innerHTML = htmlspecialchars(advertiser);
     cell6.innerHTML = htmlspecialchars(device_names);
@@ -1409,8 +1409,8 @@ OBModules.OBAdPSASystemModule = new function()
     setTimeout(() => {
       document.getElementById('start_date').value = OBModules.OBAdPSASystemModule.get_date(now=true);
       document.getElementById('stop_date').value = OBModules.OBAdPSASystemModule.get_date(now=false);
-      $("#start_date").datepicker();
-      $("#stop_date").datepicker();
+      $("#start_date").datepicker({ dateFormat: 'yy-mm-dd' });
+      $("#stop_date").datepicker({ dateFormat: 'yy-mm-dd' });
     }, 500);
     OB.API.post('obadpsadsystemmodule', 'get_all_devices', {}, function(res) {
       //console.log(res.data);
@@ -1458,12 +1458,15 @@ OBModules.OBAdPSASystemModule = new function()
   this.get_date = function (now=true)
   {
     let current_date = new Date();
-    if (now) {
-      return current_date.toLocaleDateString();
-    } else {
+    if (!now) {
       current_date.setMonth(current_date.getMonth() + 1);
-      return current_date.toLocaleDateString();
     }
+    // ISO yyyy-mm-dd from local parts. toLocaleDateString() varies by the
+    // viewer locale and toISOString() shifts to UTC; both corrupt the date.
+    let y = current_date.getFullYear();
+    let m = String(current_date.getMonth() + 1).padStart(2, '0');
+    let d = String(current_date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   this.media_data_init = function()
@@ -1529,7 +1532,7 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.fill_dropdown = function (dropdown, dropdown_value, disable_after_fill = false) {
     let dropdown_items = document.getElementById(dropdown);
-    dropdown_items.forEach((item) => {
+    Array.from(dropdown_items.options).forEach((item) => {
       if (item.value == dropdown_value) {
         item.selected = true;
       }
@@ -2376,10 +2379,9 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.enable_next_btn = function ()
   {
-    let btns = document.getElementsByClassName('next_btn');
+    let btns = document.querySelectorAll('.next_btn');
     btns.forEach(btn => {
       btn.disabled = false;
-      console.log(btn);
     });
   }
 

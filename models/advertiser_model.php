@@ -10,8 +10,7 @@ class AdvertiserModel extends OBFModel
   {
     $this->db->where('id', $id);
     $data = $this->db->get_one('module_ad_system_advertisers');
-    if ($this->db->error != '') {
-      echo $this->db->error();
+    if ($this->db->error() != '') {
       return null;
     }
     return $data;
