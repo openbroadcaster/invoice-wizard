@@ -224,6 +224,19 @@ class OBAdPSADSystemModule extends OBFController
       $time_slots = $this->data('time_slots');
       $media_type = $this->data('media_type');
       $media_file_id = $this->data('media_file_id');
+      // 1 upload, 2 Polly, 3 media library.
+      if (!in_array((string) $media_type, ['1', '2', '3'], true)) {
+        $this->log('create_invoice', 'The media type is not valid.');
+        return [false, 'The media type is not valid.'];
+      }
+      // Polly campaigns don't link their media yet, so only check one when it's given.
+      if ((string) $media_type != '2' || !empty($media_file_id)) {
+        $media_error = $this->creative_media_error($media_file_id);
+        if ($media_error) {
+          $this->log('create_invoice', $media_error);
+          return [false, $media_error];
+        }
+      }
       $campaign_name = $this->data('campaign_name');
       $buyer = $this->data('buyer');
       $revenue_type = $this->data('revenue_type');
@@ -248,6 +261,32 @@ class OBAdPSADSystemModule extends OBFController
       $this->log('create_invoice', 'The invoice couldn\'t be saved!');
       return [false, 'The invoice couldn\'t be saved!', $e];
     }
+  }
+
+  // Returns why a media item can't be a campaign's creative, or null if it can.
+  // Same rules as playlists (playlists_model validate): it must exist, be approved and
+  // unarchived, and someone else's private item needs manage_media. Audio only.
+
+  private function creative_media_error($media_id)
+  {
+    if (!preg_match('/^[0-9]+$/', (string) $media_id)) {
+      return 'Please add the creative media first.';
+    }
+    $this->db->where('id', $media_id);
+    $media = $this->db->get_one('media');
+    if (!$media) {
+      return 'The selected media item no longer exists.';
+    }
+    if ($media['type'] != 'audio') {
+      return 'The creative must be an audio item.';
+    }
+    if ($media['is_approved'] == 0 || $media['is_archived'] == 1) {
+      return 'Only approved, unarchived media can be used as the creative.';
+    }
+    if ($media['status'] == 'private' && $media['owner_id'] != $this->user->param('id') && !$this->user->check_permission('manage_media')) {
+      return 'The selected media item is private.';
+    }
+    return null;
   }
 
   public function get_invoices($sort_col='id', $sort_dir='asc')

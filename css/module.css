@@ -181,6 +181,17 @@ MIT Licensed
 	display: none;
 }
 
+/* the media library area shows only when that Media Type is picked. */
+#library_media_area {
+	display: none;
+}
+
+#library_media_drop {
+	border: 2px dashed #888;
+	padding: 16px;
+	min-width: 300px;
+}
+
 /* style view client table */
 
 #client_table {

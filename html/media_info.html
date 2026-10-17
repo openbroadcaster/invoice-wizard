@@ -32,8 +32,9 @@
 	</div>
 	<div class="fieldrow">
 		<label for="audio_type">Media Type</label>
-		<select name="audio_type" id="audio_type" onchange="OBModules.OBAdPSASystemModule.selected_audio_type();" required>
+		<select name="audio_type" id="audio_type" onchange="OBModules.OBAdPSASystemModule.audio_type_changed();" required>
 			<option value="upload">Upload Media</option>
+			<option value="library">From Media Library</option>
 			<option value="aws_tts">AWS Polly TTS</option>
 		</select>
 	</div>
@@ -47,13 +48,13 @@
 			<option value="other">Other</option>
 		</select>
 	</div>
-	<div class="fieldrow">
+	<div class="fieldrow" id="country_row">
 		<label for="country">Country</label>
 		<select name="" id="country">
 		  <option value="" hidden selected>Please select a country</option>
 		</select>
 	</div>
-	<div class="fieldrow">
+	<div class="fieldrow" id="language_row">
 		<label for="language">Language</label>
 		<select name="" id="language">
 		  <option value="" hidden selected>Please select a language</option>
@@ -143,6 +144,12 @@
 			<label for="audio_file">Audio File</label>
 			<input type="file" accept="audio/*" id="audio_file" value="" onchange="OBModules.OBAdPSASystemModule.media_check();" required>
 			<button type="button" id="submit_audio_btn" required onclick="OBModules.OBAdPSASystemModule.media_upload();">Submit audio</button>
+		</div>
+	</div>
+	<div id="library_media_area">
+		<div class="fieldrow">
+			<label for="library_media_drop">Library Media</label>
+			<div id="library_media_drop">Drag an audio item from the media list here</div>
 		</div>
 	</div>
 </fieldset>

@@ -1477,6 +1477,7 @@ OBModules.OBAdPSASystemModule = new function()
       OBModules.OBAdPSASystemModule.load_current_top_screen_values();
     }, 800);
     OBModules.OBAdPSASystemModule.fill_country_language();
+    OBModules.OBAdPSASystemModule.library_media_init();
     OBModules.OBAdPSASystemModule.message_text_onload();
   }
 
@@ -1506,6 +1507,10 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.start_page = function()
  	{
+    // a new campaign starts with no creative picked (these keys live for the whole tab).
+    ['current_media_id', 'upload_media_id', 'library_media_id', 'library_media_label'].forEach((key) => {
+      sessionStorage.removeItem(key);
+    });
     OBModules.OBAdPSASystemModule.get_page('start.html', bypass_feild_check=true);
     OBModules.OBAdPSASystemModule.start_page_data_init();
     setTimeout(OBModules.OBAdPSASystemModule.get_page_fields, 2000);
@@ -1767,6 +1772,7 @@ OBModules.OBAdPSASystemModule = new function()
         $('#ad_psa_system_status_message').obWidget('success', "Your AD/PSA is uploaded. Do not exit the wizard!");
         // store the saved media id so submit_invoice can link the creative to the campaign.
         OBModules.OBAdPSASystemModule.set_data('current_media_id', res.data);
+        OBModules.OBAdPSASystemModule.set_data('upload_media_id', res.data);
         // Reload the media sidebar after the upload is saved.
         OB.Sidebar.mediaSearch();
         OBModules.OBAdPSASystemModule.enable_next_btn();
@@ -1787,15 +1793,82 @@ OBModules.OBAdPSASystemModule = new function()
   this.selected_audio_type = function()
   {
     let audio_type = document.getElementById('audio_type').value;
-    let audio_file_upload_area = document.getElementById('audio_file_upload_area');
-    let polly_tts_area = document.getElementById('polly_tts_area');
-    if (audio_type == 'aws_tts') {
-        audio_file_upload_area.style.display = 'none';
-        polly_tts_area.style.display = 'block';
-    } else {
-      audio_file_upload_area.style.display = 'block';
-      polly_tts_area.style.display = 'none';
+    document.getElementById('audio_file_upload_area').style.display = audio_type == 'upload' ? 'block' : 'none';
+    document.getElementById('polly_tts_area').style.display = audio_type == 'aws_tts' ? 'block' : 'none';
+    document.getElementById('library_media_area').style.display = audio_type == 'library' ? 'block' : 'none';
+    // country/language describe new media (uploads, Polly), not an existing library item.
+    document.getElementById('country_row').style.display = audio_type == 'library' ? 'none' : '';
+    document.getElementById('language_row').style.display = audio_type == 'library' ? 'none' : '';
+  }
+
+  // Media Type changed: show its area and bring back the creative already picked for it.
+
+  this.audio_type_changed = function()
+  {
+    OBModules.OBAdPSASystemModule.selected_audio_type();
+    OBModules.OBAdPSASystemModule.restore_media_selection();
+  }
+
+  // Points current_media_id at the creative picked for the current Media Type and sets
+  // the Next buttons to match. Polly keeps its own flow (its submit enables Next).
+
+  this.restore_media_selection = function()
+  {
+    let audio_type = document.getElementById('audio_type').value;
+    let media_id = null;
+    if (audio_type == 'upload') {
+      media_id = OBModules.OBAdPSASystemModule.get_data('upload_media_id');
+    } else if (audio_type == 'library') {
+      media_id = OBModules.OBAdPSASystemModule.get_data('library_media_id');
+      let label = OBModules.OBAdPSASystemModule.get_data('library_media_label');
+      document.getElementById('library_media_drop').textContent = (media_id && label) ? label : 'Drag an audio item from the media list here';
     }
+    OBModules.OBAdPSASystemModule.set_data('current_media_id', media_id || '');
+    document.querySelectorAll('.next_btn').forEach(btn => {
+      btn.disabled = !media_id;
+    });
+  }
+
+  // Lets one audio item be dragged from the media sidebar onto page 2 as the creative.
+
+  this.library_media_init = function()
+  {
+    $('#library_media_drop').droppable({
+      drop: function(event, ui) {
+        let item = $(ui.draggable);
+        if (item.attr('data-mode') != 'media') {
+          return;
+        }
+        if ($('.sidebar_search_media_selected').length > 1) {
+          $('#ad_psa_system_status_message').obWidget('error', 'Please drag one media item only.');
+          return;
+        }
+        if (item.attr('data-type') != 'audio') {
+          $('#ad_psa_system_status_message').obWidget('error', 'Please choose an audio item.');
+          return;
+        }
+        OBModules.OBAdPSASystemModule.library_media_selected(item.attr('data-id'), item.attr('data-artist'), item.attr('data-title'), item.attr('data-duration'));
+      }
+    });
+  }
+
+  // Uses a library item as the campaign's creative (no upload, no Polly).
+
+  this.library_media_selected = function(id, artist, title, duration)
+  {
+    let label = (artist ? artist + ' - ' : '') + title;
+    if (duration) {
+      label += ' (' + secsToTime(duration) + ')';
+    }
+    OBModules.OBAdPSASystemModule.set_data('library_media_id', id);
+    OBModules.OBAdPSASystemModule.set_data('library_media_label', label);
+    OBModules.OBAdPSASystemModule.restore_media_selection();
+    // suggest the title as the creative name, keeping only what that field accepts.
+    let creative = document.getElementById('creative');
+    if (creative.value == '') {
+      creative.value = (title || '').replace(/[^A-Za-z0-9 ]/g, '').replace(/ +/g, ' ').trim();
+    }
+    $('#ad_psa_system_status_message').obWidget('success', 'Library item selected: ' + label);
   }
 
   // Requests tts audio from AWS Polly.
@@ -2042,6 +2115,8 @@ OBModules.OBAdPSASystemModule = new function()
         }
         let media_type = OBModules.OBAdPSASystemModule.media_type_code(document.getElementById('audio_type').value);
         OBModules.OBAdPSASystemModule.set_data('media_type', media_type);
+        OBModules.OBAdPSASystemModule.set_data('audio_type', document.getElementById('audio_type').value);
+        OBModules.OBAdPSASystemModule.set_data('message_type', document.getElementById('message_type').value);
         // own keys: 'country' already holds the billing country from the start page.
         OBModules.OBAdPSASystemModule.set_data('media_country', document.getElementById('country').value);
         OBModules.OBAdPSASystemModule.set_data('media_language', document.getElementById('language').value);
@@ -2118,7 +2193,7 @@ OBModules.OBAdPSASystemModule = new function()
           <p>Your message has been submitted.<br>Thank you for using the media/invoice wizard.\
           <br>You should now be able to view your media in the slidebar.</p></div';
       } else {
-        document.getElementById('layout_main_container').innerHTML = 'Your invoice couldn\'t be submited. If the issue continues please contact the server admin.';
+        document.getElementById('layout_main_container').textContent = "Your invoice couldn't be submitted: " + (res.msg || 'please contact the server admin.');
       }
     });
   }
@@ -2285,6 +2360,9 @@ OBModules.OBAdPSASystemModule = new function()
           OBModules.OBAdPSASystemModule.fill_dropdown('bed_music', OBModules.OBAdPSASystemModule.get_data('bed_music'));
           document.getElementById('country').value = OBModules.OBAdPSASystemModule.get_data('media_country') || '';
           document.getElementById('language').value = OBModules.OBAdPSASystemModule.get_data('media_language') || '';
+          OBModules.OBAdPSASystemModule.fill_dropdown('message_type', OBModules.OBAdPSASystemModule.get_data('message_type'));
+          OBModules.OBAdPSASystemModule.selected_audio_type();
+          OBModules.OBAdPSASystemModule.restore_media_selection();
         }, 800);
         break;
     }
