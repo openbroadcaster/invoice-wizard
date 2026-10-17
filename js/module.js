@@ -1488,19 +1488,8 @@ OBModules.OBAdPSASystemModule = new function()
   {
     let country = document.getElementById('country');
     let language = document.getElementById('language');
-    if (!country || !language) return;
-    (OB.Settings.countries || []).forEach((item) => {
-      let option = document.createElement('option');
-      option.value = item.country_id;
-      option.text = item.name;
-      country.add(option);
-    });
-    (OB.Settings.languages || []).forEach((item) => {
-      let option = document.createElement('option');
-      option.value = item.language_id;
-      option.text = item.ref_name;
-      language.add(option);
-    });
+    OB.Settings.countries.forEach((item) => country.add(new Option(item.name, item.country_id)));
+    OB.Settings.languages.forEach((item) => language.add(new Option(item.ref_name, item.language_id)));
   }
 
   // Opens the start page of the Wizard. This should load on module startup.
@@ -1678,9 +1667,9 @@ OBModules.OBAdPSASystemModule = new function()
     OB.UI.openModalWindow('modules/obadpsasystem/media_loader.html');
     // 5.4-develop's upload.php only accepts a nonce (5.4 ignores it), so get one first.
     OB.API.post('account', 'nonce', {'purpose': 'upload'}, function(res) {
-      if (!res.status || !res.data || !res.data.nonce) {
+      if (!res.status || !res.data.nonce) {
         OB.UI.closeModalWindow();
-        $('#ad_psa_system_status_message').obWidget('error', 'Upload failed: ' + (res.msg || 'the server did not allow the upload.'));
+        $('#ad_psa_system_status_message').obWidget('error', 'Upload failed: the server did not allow the upload.');
         return;
       }
       $.ajax({
@@ -1696,15 +1685,10 @@ OBModules.OBAdPSASystemModule = new function()
   }
 
   // Returns why an upload.php reply failed, or null if the upload worked.
+  // response is the parsed reply, or null when it wasn't JSON.
 
-  this.upload_error_message = function(status, text)
+  this.upload_error_message = function(status, response)
   {
-    let response = null;
-    try {
-      response = JSON.parse(text);
-    } catch (e) {
-      response = null;
-    }
     if (status == 413) {
       return 'Upload failed: the file is larger than this server accepts.';
     }
@@ -1727,24 +1711,26 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.save_error_message = function(res)
   {
-    if (res && Array.isArray(res.data) && typeof res.data[2] === 'string') {
+    if (Array.isArray(res.data) && typeof res.data[2] === 'string') {
       return "Your AD/PSA couldn't be uploaded: " + res.data[2];
     }
-    if (res && res.msg) {
-      return res.msg;
-    }
-    return "Your AD/PSA couldn't be uploaded.";
+    return res.msg || "Your AD/PSA couldn't be uploaded.";
   }
 
   this.media_upload_done = function(xhr)
   {
     OB.UI.closeModalWindow();
-    let error = OBModules.OBAdPSASystemModule.upload_error_message(xhr.status, xhr.responseText);
+    let response = null;
+    try {
+      response = JSON.parse(xhr.responseText);
+    } catch (e) {
+      // not JSON (e.g. a web server error page), reported below.
+    }
+    let error = OBModules.OBAdPSASystemModule.upload_error_message(xhr.status, response);
     if (error) {
       $('#ad_psa_system_status_message').obWidget('error', error);
       return;
     }
-    var response = JSON.parse(xhr.responseText);
     OBModules.OBAdPSASystemModule.media = response;
     let media = OBModules.OBAdPSASystemModule.media;
     let id = media['id'];
@@ -1820,8 +1806,9 @@ OBModules.OBAdPSASystemModule = new function()
       media_id = OBModules.OBAdPSASystemModule.get_data('upload_media_id');
     } else if (audio_type == 'library') {
       media_id = OBModules.OBAdPSASystemModule.get_data('library_media_id');
-      let label = OBModules.OBAdPSASystemModule.get_data('library_media_label');
-      document.getElementById('library_media_drop').textContent = (media_id && label) ? label : 'Drag an audio item from the media list here';
+      if (media_id) {
+        document.getElementById('library_media_drop').textContent = OBModules.OBAdPSASystemModule.get_data('library_media_label');
+      }
     }
     OBModules.OBAdPSASystemModule.set_data('current_media_id', media_id || '');
     document.querySelectorAll('.next_btn').forEach(btn => {
@@ -1863,11 +1850,6 @@ OBModules.OBAdPSASystemModule = new function()
     OBModules.OBAdPSASystemModule.set_data('library_media_id', id);
     OBModules.OBAdPSASystemModule.set_data('library_media_label', label);
     OBModules.OBAdPSASystemModule.restore_media_selection();
-    // suggest the title as the creative name, keeping only what that field accepts.
-    let creative = document.getElementById('creative');
-    if (creative.value == '') {
-      creative.value = (title || '').replace(/[^A-Za-z0-9 ]/g, '').replace(/ +/g, ' ').trim();
-    }
     $('#ad_psa_system_status_message').obWidget('success', 'Library item selected: ' + label);
   }
 
@@ -2539,16 +2521,7 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.media_type_code = function (audio_type)
   {
-    switch (audio_type) {
-      case 'upload':
-        return 1;
-      case 'aws_tts':
-        return 2;
-      case 'library':
-        return 3;
-      default:
-        return null;
-    }
+    return {'upload': 1, 'aws_tts': 2, 'library': 3}[audio_type] ?? null;
   }
 
   // Enables next buttons in the wizzard.
