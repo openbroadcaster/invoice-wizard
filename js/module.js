@@ -1476,7 +1476,30 @@ OBModules.OBAdPSASystemModule = new function()
     setTimeout(() => {
       OBModules.OBAdPSASystemModule.load_current_top_screen_values();
     }, 800);
+    OBModules.OBAdPSASystemModule.fill_country_language();
     OBModules.OBAdPSASystemModule.message_text_onload();
+  }
+
+  // Fills the page 2 country/language lists from this server's own lists, so the
+  // saved ids match its countries/languages tables (the old hardcoded lists didn't).
+
+  this.fill_country_language = function()
+  {
+    let country = document.getElementById('country');
+    let language = document.getElementById('language');
+    if (!country || !language) return;
+    (OB.Settings.countries || []).forEach((item) => {
+      let option = document.createElement('option');
+      option.value = item.country_id;
+      option.text = item.name;
+      country.add(option);
+    });
+    (OB.Settings.languages || []).forEach((item) => {
+      let option = document.createElement('option');
+      option.value = item.language_id;
+      option.text = item.ref_name;
+      language.add(option);
+    });
   }
 
   // Opens the start page of the Wizard. This should load on module startup.
@@ -1960,6 +1983,9 @@ OBModules.OBAdPSASystemModule = new function()
         }
         let media_type = OBModules.OBAdPSASystemModule.media_type_code(document.getElementById('audio_type').value);
         OBModules.OBAdPSASystemModule.set_data('media_type', media_type);
+        // own keys: 'country' already holds the billing country from the start page.
+        OBModules.OBAdPSASystemModule.set_data('media_country', document.getElementById('country').value);
+        OBModules.OBAdPSASystemModule.set_data('media_language', document.getElementById('language').value);
       }
       //let tmp_array = {};
       // for (var i = 0; i < OBModules.OBAdPSASystemModule.fields.length; i++) {
@@ -2198,6 +2224,8 @@ OBModules.OBAdPSASystemModule = new function()
           document.getElementById('message_text').value = OBModules.OBAdPSASystemModule.get_data('message_text');
           document.getElementById('tts_speed').value = OBModules.OBAdPSASystemModule.get_data('tts_speed');
           OBModules.OBAdPSASystemModule.fill_dropdown('bed_music', OBModules.OBAdPSASystemModule.get_data('bed_music'));
+          document.getElementById('country').value = OBModules.OBAdPSASystemModule.get_data('media_country') || '';
+          document.getElementById('language').value = OBModules.OBAdPSASystemModule.get_data('media_language') || '';
         }, 800);
         break;
     }
