@@ -1958,8 +1958,7 @@ OBModules.OBAdPSASystemModule = new function()
           OBModules.OBAdPSASystemModule.set_data('ad_id', "NA");
           document.getElementById('ad_id').value = 'NA';
         }
-        let tmp_media_type = document.getElementById('audio_type').value;
-        let media_type = tmp_media_type = 'upload' ? 1 : 2;
+        let media_type = OBModules.OBAdPSASystemModule.media_type_code(document.getElementById('audio_type').value);
         OBModules.OBAdPSASystemModule.set_data('media_type', media_type);
       }
       //let tmp_array = {};
@@ -2136,12 +2135,8 @@ OBModules.OBAdPSASystemModule = new function()
     review2_field_names.forEach(field => {
       if (field == 'media_type') {
         let value = OBModules.OBAdPSASystemModule.get_data(field);
-        console.log('value', value);
-        if (value == 1) {
-          document.getElementById(field).innerHTML = 'Uploaded Media';
-        } else {
-          document.getElementById(field).innerHTML = 'TTS audio';
-        }
+        let labels = {'1': 'Uploaded Media', '2': 'TTS audio', '3': 'Media Library'};
+        document.getElementById(field).innerHTML = labels[value] ?? '';
       } else {
         let value = OBModules.OBAdPSASystemModule.get_data(field);
         let ele = document.getElementById(field);
@@ -2373,6 +2368,22 @@ OBModules.OBAdPSASystemModule = new function()
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
+  }
+
+  // Maps the page 2 Media Type value to the code stored on the campaign.
+
+  this.media_type_code = function (audio_type)
+  {
+    switch (audio_type) {
+      case 'upload':
+        return 1;
+      case 'aws_tts':
+        return 2;
+      case 'library':
+        return 3;
+      default:
+        return null;
+    }
   }
 
   // Enables next buttons in the wizzard.
