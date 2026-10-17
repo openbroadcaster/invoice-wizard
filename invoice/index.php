@@ -14,14 +14,24 @@ $load = OBFLoad::get_instance();
 $db = OBFDB::get_instance();
 $user = OBFUser::get_instance();
 
-$contenteditable = "true";
+// invoices hold buyer and billing details, so only signed-in users who can view
+// invoices may open one (the same cookie login check as the main index.php).
+if (empty($_COOKIE['ob_auth_id']) || empty($_COOKIE['ob_auth_key']) || !$user->auth($_COOKIE['ob_auth_id'], $_COOKIE['ob_auth_key']) || !$user->check_permission('ad_psa_system_view_invoices')) {
+  http_response_code(403);
+  die('Please sign in with an account that can view invoices.');
+}
 
-// Check user can use the inline tmp feature of edit mode.
+// invoice values come from campaign forms, so print them as text.
+function invoice_text($value)
+{
+  return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
 
-if (isset($_GET['mode'])) {
-  if ($_GET['mode'] == '1') {
-    $contenteditable = "true";
-  }
+$contenteditable = "false";
+
+// edit mode (mode=1): same permission the invoice list checks before offering that link.
+if (isset($_GET['mode']) && $_GET['mode'] == '1' && $user->check_permission('ad_psa_system_create_invoices')) {
+  $contenteditable = "true";
 }
 
 $SettingsModel = $load->model('Settings');
@@ -74,13 +84,13 @@ if ($invoice_data == null) {
       <div class="top-area">
         <div class="station-info">
           <pre>
-            <?php print($from_company_name. "\n"); ?>
-            <?php print($from_company_name_addr. "\n"); ?>
-            <?php print($from_company_name_city); ?>, <?php print($from_company_state_prov); ?> <?php print($from_company_zip_code. "\n"); ?>
-            <?php print($from_company_country); ?>
+            <?php print(invoice_text($from_company_name) . "\n"); ?>
+            <?php print(invoice_text($from_company_name_addr) . "\n"); ?>
+            <?php print(invoice_text($from_company_name_city)); ?>, <?php print(invoice_text($from_company_state_prov)); ?> <?php print(invoice_text($from_company_zip_code) . "\n"); ?>
+            <?php print(invoice_text($from_company_country)); ?>
           </pre>
         </div>
-        <img src="../../../preview.php?id=<?php echo $station_logo; ?>" alt="station logo" class="station-logo">
+        <img src="../../../preview.php?id=<?php echo invoice_text($station_logo); ?>" alt="station logo" class="station-logo">
         <p>We warrant that the broadcast information shown on this invoice was taken
 from the program logs</p>
         <div class="top-right">
@@ -94,7 +104,7 @@ from the program logs</p>
             </div>
             <div class="item" contenteditable=<?php echo $contenteditable; ?>>
               <label for="">Invoice Date</label>
-              <?php print($invoice_data['invoice_date']); ?>
+              <?php print(invoice_text($invoice_data['invoice_date'])); ?>
             </div>
             <div class="item" contenteditable=<?php echo $contenteditable; ?>>
               <label for="">Print Date</label>
@@ -104,11 +114,11 @@ from the program logs</p>
           <div class="col">
             <div class="item" contenteditable=<?php echo $contenteditable; ?>>
               <label for="">Contract Number</label>
-              <?php print($invoice_data['contract_number']) ?>
+              <?php print(invoice_text($invoice_data['contract_number'])); ?>
             </div>
             <div class="item" contenteditable=<?php echo $contenteditable; ?>>
               <label for="">Invoice Number</label>
-              <?php print($invoice_data['invoice_number']); ?>
+              <?php print(invoice_text($invoice_data['invoice_number'])); ?>
             </div>
             <div class="item" contenteditable=<?php echo $contenteditable; ?>>
               <label for="">Page</label>
@@ -117,11 +127,11 @@ from the program logs</p>
           </div>
           <div class="item" contenteditable=<?php echo $contenteditable; ?>>
             <label for="">Revenue Type</label>
-            <?php print($invoice_data['revenue_type']) ?>
+            <?php print(invoice_text($invoice_data['revenue_type'])); ?>
           </div>
           <div class="item" contenteditable=<?php echo $contenteditable; ?>>
             <label for="">Product</label>
-            <?php print($invoice_data['campaign_name']); ?>
+            <?php print(invoice_text($invoice_data['campaign_name'])); ?>
           </div>
         </div>
         <div class="row">
@@ -129,11 +139,11 @@ from the program logs</p>
           <div class="item">
             <label for="">BILL TO:</label>
             <div class="bill_to_text">
-              <?php print($invoice_data['billing_mailing_address']) ?>
+              <?php print(invoice_text($invoice_data['billing_mailing_address'])); ?>
               <br>
-              <?php print($invoice_data['billing_mailing_city']) ?> <?php print($invoice_data['billing_mailing_state_prov']) ?>
+              <?php print(invoice_text($invoice_data['billing_mailing_city'])); ?> <?php print(invoice_text($invoice_data['billing_mailing_state_prov'])); ?>
               <br>
-              <?php print($invoice_data['billing_mailing_zip_code']) ?>
+              <?php print(invoice_text($invoice_data['billing_mailing_zip_code'])); ?>
             </div>
           </div>
         </div>
@@ -146,30 +156,30 @@ from the program logs</p>
           $devices = explode(",", $invoice_data['device_names']);
           if (count($devices) > 1) {
             foreach ($devices as $device) {
-              print($device. ', ');
+              print(invoice_text($device) . ', ');
             }
           } else {
-            print($devices[0]);
+            print(invoice_text($devices[0]));
           }
           ?>
         </div>
         <div class="item" contenteditable=<?php echo $contenteditable; ?>>
           <label for="">Advertiser</label>
-          <?php print($invoice_data['advertiser']); ?>
+          <?php print(invoice_text($invoice_data['advertiser'])); ?>
         </div>
         <div class="item" contenteditable=<?php echo $contenteditable; ?>>
           <label for="">Sales Rep</label>
-          <?php echo $invoice_data['sales_rep']; ?>
+          <?php echo invoice_text($invoice_data['sales_rep']); ?>
         </div>
       </div>
       <div class="col">
         <div class="item" contenteditable=<?php echo $contenteditable; ?>>
           <label for="">Creative Name:</label>
-          <?php echo $invoice_data['creative'] ?>
+          <?php echo invoice_text($invoice_data['creative']); ?>
         </div>
         <div class="item" contenteditable=<?php echo $contenteditable; ?>>
           <label for="">Ad-ID:</label>
-          <?php echo $invoice_data['ad_id'] ?>
+          <?php echo invoice_text($invoice_data['ad_id']); ?>
         </div>
       </div>
       <table>
@@ -233,10 +243,10 @@ from the program logs</p>
           <br>
           Please remit payment to:
           <br>
-          <?php echo $from_company_name; ?>
+          <?php echo invoice_text($from_company_name); ?>
           <br>
           <br>
-          if you have any questions or wish to make payment arrangements, please contact <?php echo $from_company_phone; ?>.
+          if you have any questions or wish to make payment arrangements, please contact <?php echo invoice_text($from_company_phone); ?>.
         </div>
         <div class="item" contenteditable=<?php echo $contenteditable; ?>>
           Actual Occasions 1
