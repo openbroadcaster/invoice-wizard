@@ -264,8 +264,8 @@ class OBAdPSADSystemModule extends OBFController
   }
 
   // Returns why a media item can't be a campaign's creative, or null if it can.
-  // Same rules as playlists (playlists_model validate): it must exist, be approved and
-  // unarchived, and someone else's private item needs manage_media. Audio only.
+  // Approval isn't checked here: an upload by a user who can't approve media is saved
+  // unapproved until the station approves it, and the slots only air approved media.
 
   private function creative_media_error($media_id)
   {
@@ -277,12 +277,10 @@ class OBAdPSADSystemModule extends OBFController
     if (!$media) {
       return 'The selected media item no longer exists.';
     }
-    if ($media['type'] != 'audio') {
-      return 'The creative must be an audio item.';
+    if ($media['is_archived'] == 1) {
+      return "Archived media can't be used as the creative.";
     }
-    if ($media['is_approved'] == 0 || $media['is_archived'] == 1) {
-      return 'Only approved, unarchived media can be used as the creative.';
-    }
+    // same rule as playlists: someone else's private item needs manage_media.
     if ($media['status'] == 'private' && $media['owner_id'] != $this->user->param('id') && !$this->user->check_permission('manage_media')) {
       return 'The selected media item is private.';
     }

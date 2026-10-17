@@ -45,7 +45,7 @@ class AdsModel extends OBFModel
     return null;
   }
 
-  // Returns the creatives of the campaigns running today, in random order.
+  // Returns the approved creatives of the campaigns running today, in random order.
   // Core calls slot callbacks without the player or air time, so this can't
   // target stations or the actual air date yet, and ads and PSAs share one list.
 
@@ -63,7 +63,12 @@ class AdsModel extends OBFModel
         $media_ids[] = $campaign['media_file_id'];
       }
     }
-    $media_ids = array_values(array_unique($media_ids));
+    // core plays whatever ids a slot returns, so only keep media that may air.
+    $media_ids = array_values(array_filter(array_unique($media_ids), function ($media_id) {
+      $this->db->where('id', $media_id);
+      $media = $this->db->get_one('media');
+      return $media && $media['is_approved'] == 1 && $media['is_archived'] == 0;
+    }));
     shuffle($media_ids);
 
     return $media_ids;
