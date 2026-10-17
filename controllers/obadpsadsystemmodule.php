@@ -55,8 +55,8 @@ class OBAdPSADSystemModule extends OBFController
     $country = $this->data('country');
     $language = $this->data('language');
     if (empty($country) && $country == '') {
-      $this->log('submit_tts_audio', 'Failed to save the tts audio! Please select a country first.');
-      return [false, "Failed to save the tts audio! Please select a country first.", null];
+      $this->log('save_media', 'Failed to upload audio! Please select a country first.');
+      return [false, "Failed to upload audio! Please select a country first.", null];
     }
     if ($creative  == '' || $creative == null) {
       $this->log('save_media', 'Failed to upload audio! Please enter a creative name first.');

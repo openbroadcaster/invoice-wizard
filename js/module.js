@@ -1665,22 +1665,81 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.media_upload = function()
   {
+    let file = $('#audio_file')[0].files[0];
+    if (!file) {
+      $('#ad_psa_system_status_message').obWidget('error', 'Please choose an audio file first.');
+      return;
+    }
     OB.UI.openModalWindow('modules/obadpsasystem/media_loader.html');
-    $.ajax({
-      url: '/upload.php',
-      type: 'POST',
-      data: $('#audio_file')[0].files[0],
-      cache: false,
-      contentType: false,
-      processData: false,
-      complete : OBModules.OBAdPSASystemModule.media_upload_done
+    // 5.4-develop's upload.php only accepts a nonce (5.4 ignores it), so get one first.
+    OB.API.post('account', 'nonce', {'purpose': 'upload'}, function(res) {
+      if (!res.status || !res.data || !res.data.nonce) {
+        OB.UI.closeModalWindow();
+        $('#ad_psa_system_status_message').obWidget('error', 'Upload failed: ' + (res.msg || 'the server did not allow the upload.'));
+        return;
+      }
+      $.ajax({
+        url: '/upload.php?nonce=' + encodeURIComponent(res.data.nonce),
+        type: 'POST',
+        data: file,
+        cache: false,
+        contentType: false,
+        processData: false,
+        complete : OBModules.OBAdPSASystemModule.media_upload_done
+      });
     });
+  }
+
+  // Returns why an upload.php reply failed, or null if the upload worked.
+
+  this.upload_error_message = function(status, text)
+  {
+    let response = null;
+    try {
+      response = JSON.parse(text);
+    } catch (e) {
+      response = null;
+    }
+    if (status == 413) {
+      return 'Upload failed: the file is larger than this server accepts.';
+    }
+    if (status == 0) {
+      return 'Upload failed: no reply from the server.';
+    }
+    if (response === null || typeof response !== 'object') {
+      return 'Upload failed (the server replied ' + status + ').';
+    }
+    if (response.error) {
+      return 'Upload failed: ' + response.error;
+    }
+    if (!response.file_id || !response.file_key) {
+      return 'Upload failed: the server did not return the file.';
+    }
+    return null;
+  }
+
+  // Returns the message for a failed save_media, with the server's reason when it gave one.
+
+  this.save_error_message = function(res)
+  {
+    if (res && Array.isArray(res.data) && typeof res.data[2] === 'string') {
+      return "Your AD/PSA couldn't be uploaded: " + res.data[2];
+    }
+    if (res && res.msg) {
+      return res.msg;
+    }
+    return "Your AD/PSA couldn't be uploaded.";
   }
 
   this.media_upload_done = function(xhr)
   {
     OB.UI.closeModalWindow();
-    var response = $.parseJSON(xhr.responseText);
+    let error = OBModules.OBAdPSASystemModule.upload_error_message(xhr.status, xhr.responseText);
+    if (error) {
+      $('#ad_psa_system_status_message').obWidget('error', error);
+      return;
+    }
+    var response = JSON.parse(xhr.responseText);
     OBModules.OBAdPSASystemModule.media = response;
     let media = OBModules.OBAdPSASystemModule.media;
     let id = media['id'];
@@ -1712,7 +1771,7 @@ OBModules.OBAdPSASystemModule = new function()
         OB.Sidebar.mediaSearch();
         OBModules.OBAdPSASystemModule.enable_next_btn();
       } else {
-        $('#ad_psa_system_status_message').obWidget('error', "Your AD/PSA couldn't be uploaded. Please contact a server admin.");
+        $('#ad_psa_system_status_message').obWidget('error', OBModules.OBAdPSASystemModule.save_error_message(res));
       }
     });
   }
