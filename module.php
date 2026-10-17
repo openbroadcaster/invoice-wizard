@@ -331,7 +331,7 @@ PRIMARY KEY (`id`)
 	$data['name'] = 'ad_slot_30';
 	$data['description'] = 'Ad Slot :30';
 	$data['duration'] = '30';
-	$data['callback_model'] = 'AdsModel';
+	$data['callback_model'] = 'Ads'; // core loads module models by file prefix (ads_model.php)
 	$data['callback_method'] = 'ad_slot_30';
 	$this->db->insert('playlists_items_types', $data);
 
@@ -339,7 +339,7 @@ PRIMARY KEY (`id`)
 	$data['name'] = 'psa_slot_30';
 	$data['description'] = 'PSA Slot :30';
 	$data['duration'] = '30';
-	$data['callback_model'] = 'AdsModel';
+	$data['callback_model'] = 'Ads';
 	$data['callback_method'] = 'psa_slot_30';
 	$this->db->insert('playlists_items_types', $data);
 

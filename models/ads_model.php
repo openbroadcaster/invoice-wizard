@@ -45,6 +45,30 @@ class AdsModel extends OBFModel
     return null;
   }
 
+  // Returns the creatives of the campaigns running today, in random order.
+  // Core calls slot callbacks without the player or air time, so this can't
+  // target stations or the actual air date yet, and ads and PSAs share one list.
+
+  private function running_campaign_media()
+  {
+    $today = date('Y-m-d');
+    $media_ids = [];
+    foreach ($this->db->get('module_ad_system_invoices') ?: [] as $campaign) {
+      $start = strtotime($campaign['start_date']);
+      $stop = strtotime($campaign['stop_date']);
+      if ($start === false || $stop === false || !preg_match('/^[0-9]+$/', (string) $campaign['media_file_id'])) {
+        continue;
+      }
+      if (date('Y-m-d', $start) <= $today && $today <= date('Y-m-d', $stop)) {
+        $media_ids[] = $campaign['media_file_id'];
+      }
+    }
+    $media_ids = array_values(array_unique($media_ids));
+    shuffle($media_ids);
+
+    return $media_ids;
+  }
+
   // Returns a list of ads to be added a playlist slot.
 
   // NOTE: For now this is the best that can done until Brook/Ruby adds some
@@ -52,13 +76,7 @@ class AdsModel extends OBFModel
 
   public function ad_slot_30()
   {
-    $output = [];
-    $ads = shuffle($this->db->get('module_ad_system_invoices'));
-    foreach ($ads as $ad) {
-      array_push($output, $ad['media_file_id']);
-    }
-
-    return $output;
+    return $this->running_campaign_media();
   }
 
   // Returns a list of psas to be added a playlist slot.
@@ -68,13 +86,7 @@ class AdsModel extends OBFModel
 
   public function psa_slot_30()
   {
-    $output = [];
-    $psas = shuffle($this->db->get('module_ad_system_invoices'));
-    foreach ($psas as $psa) {
-      array_push($output, $psa['media_file_id']);
-    }
-
-    return $output;
+    return $this->running_campaign_media();
   }
 }
 
