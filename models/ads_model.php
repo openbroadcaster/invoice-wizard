@@ -45,6 +45,21 @@ class AdsModel extends OBFModel
     return null;
   }
 
+  public function update_campaign($invoice_id, $values)
+  {
+    $this->db->where('invoice_id', $invoice_id);
+    return $this->db->update('module_ad_system_invoices', $values);
+  }
+
+  // A cached show never expires, so a campaign's change wouldn't reach it. Clears
+  // the shows holding this media the way core does when media changes.
+
+  public function clear_cached_shows($media_id)
+  {
+    $this->db->where_like('data', '"id":"'. $this->db->escape($media_id). '"');
+    $this->db->delete('shows_cache');
+  }
+
   // Returns the approved creatives of the campaigns running today, in random order.
   // Core calls slot callbacks without the player or air time, so this can't
   // target stations or the actual air date yet, and ads and PSAs share one list.

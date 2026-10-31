@@ -1,0 +1,83 @@
+<h1>Edit Campaign</h1>
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
+<fieldset>
+	<legend>
+		Campaign
+	</legend>
+	<div class="fieldrow">
+		<label>Invoice Number</label>
+		<span id="invoice_number"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Advertiser</label>
+		<span id="advertiser"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Buyer</label>
+		<span id="buyer"></span>
+	</div>
+	<div class="fieldrow">
+		<label for="campaign_name">Campaign Name</label>
+		<input type="text" id="campaign_name" value="">
+	</div>
+	<div class="fieldrow">
+		<label for="contract_number">Contract Number</label>
+		<input type="text" id="contract_number" value="">
+	</div>
+	<div class="fieldrow">
+		<label for="revenue_type">Revenue Type</label>
+		<select id="revenue_type">
+			<option value="" hidden selected>Please select a type</option>
+			<option value="INTERNATIONAL">International</option>
+			<option value="NATIONAL">National</option>
+			<option value="LOCAL">Local</option>
+			<option value="IN-KIND">In-kind</option>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="start_date">Start Date</label>
+		<input type="text" id="start_date">
+	</div>
+	<div class="fieldrow">
+		<label for="stop_date">Stop Date</label>
+		<input type="text" id="stop_date">
+	</div>
+	<div class="fieldrow">
+		<label for="stations">Stations</label>
+		<select id="stations" multiple>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="time_slots">Time Slots</label>
+		<select id="time_slots" multiple>
+			<option value="morning">Morning drive (Mon-Sun, 5 - 10 AM local)</option>
+			<option value="drive">Drive (Mon-Sun, 3 - 9 PM local)</option>
+			<option value="midday">Midday (Mon-Sun, 10 AM - 3 PM local)</option>
+			<option value="ros">ROS (Mon-Sun, 5 AM - 12 AM local)</option>
+		</select>
+	</div>
+	<div class="fieldrow">
+		<label for="campaign_notes">Campaign Notes</label>
+		<textarea id="campaign_notes" rows="4" cols="80"></textarea>
+	</div>
+</fieldset>
+<fieldset>
+	<legend>
+		(Creative) Media
+	</legend>
+	<div class="fieldrow">
+		<label for="creative">Creative</label>
+		<input type="text" id="creative" value="">
+	</div>
+	<div class="fieldrow">
+		<label for="ad_id">Ad-ID</label>
+		<input type="text" id="ad_id" value="" placeholder="ABCD1234000D, or NA">
+	</div>
+	<div class="fieldrow">
+		<label>Library Media</label>
+		<div id="library_media_drop"></div>
+	</div>
+	<p>To change the audio, drag an item from the media list onto the box above.</p>
+</fieldset>
+<button type="button" onclick="OBModules.OBAdPSASystemModule.view_campaigns();">Cancel</button>
+<button type="button" class="add" onclick="OBModules.OBAdPSASystemModule.save_campaign();">Save</button>

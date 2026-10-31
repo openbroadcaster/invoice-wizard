@@ -533,9 +533,22 @@ class OBAdPSADSystemModule extends OBFController
   public function verify_invoice_data()
   {
     $this->user->require_permission('ad_psa_system_create_campaign');
+    $status_messages = $this->invoice_data_errors(json_decode($this->data('data')), $this->data('no_ad_id') == true);
+
+    if (count($status_messages) > 0) {
+      $this->log('verify_invoice_data', 'The invoice data wasn\'t able to be verifyed!');
+      return [false, implode("\n", $status_messages), null];
+    }
+
+    $this->log('verify_invoice_data', 'The invoice data was able to be verifyed!');
+    return [true, null, null];
+  }
+
+  // Returns what's wrong with the given fields (objects with a name and a value).
+
+  private function invoice_data_errors($fields, $check_ad_id)
+  {
     $status_messages = [];
-    $data = $this->data('data');
-    $fields = json_decode($data);
     foreach ($fields as $field) {
       $name = $field->name;
       $value = $field->value;
@@ -597,7 +610,7 @@ class OBAdPSADSystemModule extends OBFController
           break;
           case 'ad_id':
             // Checks if the user isn't requiring a Ad-ID.
-            if ($this->data('no_ad_id') == true) {
+            if ($check_ad_id) {
               if ($value != "NA") {
                 // Checks if the Ad-ID is valid.
                 if (! preg_match('/^[1-9|A-Za-z][0-9A-Za-z]{3}[0-9]{4}[0-9]{3}[|H|D]$/', $value)) {
@@ -624,14 +637,7 @@ class OBAdPSADSystemModule extends OBFController
           break;
       }
     }
-
-    if (count($status_messages) > 0) {
-      $this->log('verify_invoice_data', 'The invoice data wasn\'t able to be verifyed!');
-      return [false, implode("\n", $status_messages), null];
-    }
-
-    $this->log('verify_invoice_data', 'The invoice data was able to be verifyed!');
-    return [true, null, null];
+    return $status_messages;
   }
 
   // Verifys buyer data is valid.
@@ -960,6 +966,101 @@ class OBAdPSADSystemModule extends OBFController
   }
 
   // Returns the current advertisers in the system.
+
+  // Returns a campaign for the edit page, with a label for its creative.
+
+  public function get_campaign()
+  {
+    $this->user->require_permission('ad_psa_system_view_edit_remove_campaigns');
+    $campaign = $this->AdsModel->get_invoice((string) $this->data('invoice_id'));
+    if (!$campaign) {
+      return [false, 'This campaign no longer exists.', null];
+    }
+    $this->db->where('id', $campaign['media_file_id']);
+    $media = $this->db->get_one('media');
+    $campaign['media_label'] = $media ? ($media['artist'] ? $media['artist']. ' - ' : ''). $media['title'] : '';
+    return [true, '', $campaign];
+  }
+
+  // Saves the campaign edit page. Who was billed, and the invoice's number and date, stay as they are.
+
+  public function update_campaign()
+  {
+    $this->user->require_permission('ad_psa_system_view_edit_remove_campaigns');
+    $campaign = $this->AdsModel->get_invoice((string) $this->data('invoice_id'));
+    if (!$campaign) {
+      return [false, 'This campaign no longer exists.', null];
+    }
+
+    $values = [];
+    $fields = [];
+    foreach (['campaign_name', 'contract_number', 'revenue_type', 'start_date', 'stop_date', 'time_slots', 'creative', 'ad_id', 'campaign_notes', 'media_file_id'] as $name) {
+      $values[$name] = (string) $this->data($name);
+      $fields[] = (object) ['name' => $name, 'value' => $values[$name]];
+    }
+
+    $errors = $this->invoice_data_errors($fields, true);
+    if (!in_array($values['revenue_type'], ['INTERNATIONAL', 'NATIONAL', 'LOCAL', 'IN-KIND'], true)) {
+      $errors[] = 'Please select a revenue type.';
+    }
+    if (array_diff(explode(',', $values['time_slots']), ['', 'morning', 'drive', 'midday', 'ros'])) {
+      $errors[] = 'A selected time slot is not valid.';
+    }
+    if (!$this->valid_date($values['start_date']) || !$this->valid_date($values['stop_date'])) {
+      $errors[] = 'The dates must be real dates, as YYYY-MM-DD.';
+    } elseif ($values['stop_date'] < $values['start_date']) {
+      $errors[] = 'The stop date is before the start date.';
+    }
+
+    $station_names = [];
+    $station_ids = explode(',', (string) $this->data('stations'));
+    foreach ($station_ids as $station_id) {
+      $station = check_num($station_id) ? $this->PlayersModel->get_one($station_id) : false;
+      if (!$station) {
+        $errors[] = 'Please select stations that exist.';
+        break;
+      }
+      $station_names[] = $station['name'];
+    }
+
+    // Only a new creative is checked, so media archived later doesn't block other edits.
+    $creative_changed = $values['media_file_id'] !== (string) $campaign['media_file_id'];
+    if ($creative_changed) {
+      $media_error = $this->creative_media_error($values['media_file_id']);
+      if ($media_error) {
+        $errors[] = $media_error;
+      }
+    }
+
+    if (count($errors) > 0) {
+      $this->log('update_campaign', 'The campaign wasn\'t updated: '. implode(' ', $errors));
+      return [false, implode("\n", $errors), null];
+    }
+
+    $values['device_ids'] = implode(',', $station_ids);
+    $values['device_names'] = implode(',', $station_names);
+    if ($creative_changed) {
+      $values['media_type'] = 3;
+    }
+    if ($values['campaign_notes'] === '') {
+      $values['campaign_notes'] = 'No notes was provided.';
+    }
+    if (!$this->AdsModel->update_campaign($campaign['invoice_id'], $values)) {
+      $this->log('update_campaign', 'The campaign couldn\'t be saved!');
+      return [false, 'The campaign couldn\'t be saved!', null];
+    }
+    if ($creative_changed || $values['start_date'] !== $campaign['start_date'] || $values['stop_date'] !== $campaign['stop_date']) {
+      $this->AdsModel->clear_cached_shows($campaign['media_file_id']);
+    }
+    $this->log('update_campaign', 'Campaign '. $campaign['invoice_number']. ' updated.');
+    return [true, 'The campaign has been updated.', null];
+  }
+
+  private function valid_date($value)
+  {
+    $date = DateTime::createFromFormat('Y-m-d', $value);
+    return $date && $date->format('Y-m-d') === $value;
+  }
 
   public function get_advertisers() {
     $this->user->require_permission('ad_psa_system_view_edit_remove_advertisers');

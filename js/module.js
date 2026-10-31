@@ -540,6 +540,85 @@ OBModules.OBAdPSASystemModule = new function()
     setTimeout(() => OBModules.OBAdPSASystemModule.load_campaigns(), 800);
   }
 
+  // Opens the screen to edit a campaign.
+
+  this.edit_campaign = function(invoice_id)
+  {
+    OB.API.post('obadpsadsystemmodule', 'get_campaign', {'invoice_id': invoice_id}, function(res) {
+      if (res.status) {
+        OBModules.OBAdPSASystemModule.edit_campaign_fill(res.data);
+      } else {
+        $('#ad_psa_system_status_message').obWidget('error', res.msg);
+      }
+    });
+  }
+
+  this.edit_campaign_fill = function(campaign)
+  {
+    OB.UI.replaceMain('modules/obadpsasystem/edit_campaign.html');
+    OBModules.OBAdPSASystemModule.edited_campaign = {'invoice_id': campaign.invoice_id, 'media_file_id': campaign.media_file_id};
+    ['invoice_number', 'advertiser', 'buyer'].forEach((field) => {
+      document.getElementById(field).textContent = campaign[field];
+    });
+    ['campaign_name', 'contract_number', 'revenue_type', 'start_date', 'stop_date', 'campaign_notes', 'creative', 'ad_id'].forEach((field) => {
+      document.getElementById(field).value = campaign[field];
+    });
+    OBModules.OBAdPSASystemModule.select_options('time_slots', campaign.time_slots);
+    $('#start_date, #stop_date').datepicker({ dateFormat: 'yy-mm-dd' });
+    let media_drop = document.getElementById('library_media_drop');
+    media_drop.textContent = campaign.media_label;
+    OBModules.OBAdPSASystemModule.library_media_init((id, artist, title, duration) => {
+      OBModules.OBAdPSASystemModule.edited_campaign.media_file_id = id;
+      media_drop.textContent = OBModules.OBAdPSASystemModule.library_media_label(artist, title, duration);
+    });
+    OB.API.post('obadpsadsystemmodule', 'get_all_devices', {}, function(res) {
+      if (res.status) {
+        JSON.parse(res.data).forEach((device) => {
+          document.getElementById('stations').add(new Option(device.name, device.id));
+        });
+        OBModules.OBAdPSASystemModule.select_options('stations', campaign.device_ids);
+      } else {
+        $('#ad_psa_system_status_message').obWidget('error', res.msg);
+      }
+    });
+  }
+
+  this.save_campaign = function()
+  {
+    let values = {
+      'invoice_id': OBModules.OBAdPSASystemModule.edited_campaign.invoice_id,
+      'media_file_id': OBModules.OBAdPSASystemModule.edited_campaign.media_file_id,
+      'stations': OBModules.OBAdPSASystemModule.selected_options('stations'),
+      'time_slots': OBModules.OBAdPSASystemModule.selected_options('time_slots')
+    };
+    ['campaign_name', 'contract_number', 'revenue_type', 'start_date', 'stop_date', 'campaign_notes', 'creative', 'ad_id'].forEach((field) => {
+      values[field] = document.getElementById(field).value;
+    });
+    OB.API.post('obadpsadsystemmodule', 'update_campaign', values, function(res) {
+      if (res.status) {
+        OBModules.OBAdPSASystemModule.view_campaigns();
+      }
+      $('#ad_psa_system_status_message').obWidget(res.status ? 'success' : 'error', res.msg);
+    });
+  }
+
+  // Selects the options of a multiple select from a comma separated list of values.
+
+  this.select_options = function(select, values)
+  {
+    let selected = values.split(',');
+    Array.from(document.getElementById(select).options).forEach((option) => {
+      option.selected = selected.includes(option.value);
+    });
+  }
+
+  // Returns the selected options of a multiple select as a comma separated list.
+
+  this.selected_options = function(select)
+  {
+    return Array.from(document.getElementById(select).selectedOptions).map((option) => option.value).join(',');
+  }
+
   // Adds a campaign to the table of campaigns.
   this.add_campaign_to_table = function(id, start_date, start_time, stop_date, stop_time, buyer, device_names,
                                         name, advertiser)
@@ -562,8 +641,8 @@ OBModules.OBAdPSASystemModule = new function()
     cell4.innerHTML = htmlspecialchars(buyer);
     cell5.innerHTML = htmlspecialchars(advertiser);
     cell6.innerHTML = htmlspecialchars(device_names);
-    //cell7.innerHTML = `<button class="edit" onclick="OBModules.OBAdPSASystemModule.open_edit_company_modal(${id});">Edit</button>`;
-    //cell8.innerHTML = `<button class="delete" onclick="OBModules.OBAdPSASystemModule.open_remove_company_modal(${id});">Remove</button>`;
+    cell7.innerHTML = '<button class="edit">Edit</button>';
+    cell7.firstChild.onclick = () => OBModules.OBAdPSASystemModule.edit_campaign(id);
   }
 
   // This should be runned anytime after
@@ -1414,7 +1493,7 @@ OBModules.OBAdPSASystemModule = new function()
       OBModules.OBAdPSASystemModule.load_current_top_screen_values();
     }, 800);
     OBModules.OBAdPSASystemModule.fill_country_language();
-    OBModules.OBAdPSASystemModule.library_media_init();
+    OBModules.OBAdPSASystemModule.library_media_init(OBModules.OBAdPSASystemModule.library_media_selected);
     OBModules.OBAdPSASystemModule.message_text_onload();
   }
 
@@ -1767,9 +1846,9 @@ OBModules.OBAdPSASystemModule = new function()
     });
   }
 
-  // Lets one audio item be dragged from the media sidebar onto page 2 as the creative.
+  // Lets one audio item be dragged from the media sidebar onto the media box.
 
-  this.library_media_init = function()
+  this.library_media_init = function(on_selected)
   {
     $('#library_media_drop').droppable({
       drop: function(event, ui) {
@@ -1785,19 +1864,25 @@ OBModules.OBAdPSASystemModule = new function()
           $('#ad_psa_system_status_message').obWidget('error', 'Please choose an audio item.');
           return;
         }
-        OBModules.OBAdPSASystemModule.library_media_selected(item.attr('data-id'), item.attr('data-artist'), item.attr('data-title'), item.attr('data-duration'));
+        on_selected(item.attr('data-id'), item.attr('data-artist'), item.attr('data-title'), item.attr('data-duration'));
       }
     });
+  }
+
+  this.library_media_label = function(artist, title, duration)
+  {
+    let label = (artist ? artist + ' - ' : '') + title;
+    if (duration) {
+      label += ' (' + secsToTime(duration) + ')';
+    }
+    return label;
   }
 
   // Uses a library item as the campaign's creative (no upload, no Polly).
 
   this.library_media_selected = function(id, artist, title, duration)
   {
-    let label = (artist ? artist + ' - ' : '') + title;
-    if (duration) {
-      label += ' (' + secsToTime(duration) + ')';
-    }
+    let label = OBModules.OBAdPSASystemModule.library_media_label(artist, title, duration);
     OBModules.OBAdPSASystemModule.set_data('library_media_id', id);
     OBModules.OBAdPSASystemModule.set_data('library_media_label', label);
     OBModules.OBAdPSASystemModule.restore_media_selection();
