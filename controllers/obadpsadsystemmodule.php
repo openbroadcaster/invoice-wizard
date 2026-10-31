@@ -85,8 +85,8 @@ class OBAdPSADSystemModule extends OBFController
     } else {
       // This is a failsafe though we always get one of the values above,
       // if for some reason we don't reject the request.
-      $this->log('save_media', 'Failed to upload the audio!');
-      return [false, "Failed to upload the audio!", null];
+      $this->log('save_media', 'Failed to upload the audio! Please select a Message Type first.');
+      return [false, "Please select a Message Type first.", null];
     }
 
     $file_info = $this->uploads_model->file_info($file_id, $file_key);
@@ -552,6 +552,9 @@ class OBAdPSADSystemModule extends OBFController
     foreach ($fields as $field) {
       $name = $field->name;
       $value = $field->value;
+      if (!check_latin($value)) {
+        array_push($status_messages, 'The '. str_replace('_', ' ', $name). ' field can only use Latin characters for now.');
+      }
       switch ($name) {
         /* Page 1 values check */
         // Checking text is only A-Z chars, spaces, and commas.

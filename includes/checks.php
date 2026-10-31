@@ -19,6 +19,12 @@
     See license information in extras/valums-file-uploader.
 */
 
+// Checks if text fits the module's latin1 tables. MySQL stores anything else as ??? and reports success.
+
+function check_latin($value) {
+  return mb_convert_encoding(mb_convert_encoding($value, 'Windows-1252', 'UTF-8'), 'UTF-8', 'Windows-1252') === $value;
+}
+
 // Checks if string is only 0-9 chars.
 
 function check_num($value) {

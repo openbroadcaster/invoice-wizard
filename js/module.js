@@ -2190,6 +2190,8 @@ OBModules.OBAdPSASystemModule = new function()
           }
       }
     }
+    // the notes live in a modal, so they aren't one of the page's fields.
+    data.push({'name': 'campaign_notes', 'value': OBModules.OBAdPSASystemModule.get_data('campaign_notes') || ''});
     let json_data = JSON.stringify(data);
     console.log(json_data);
     if (next_page == 'review1.html') {
