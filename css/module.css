@@ -186,6 +186,11 @@ MIT Licensed
 	display: none;
 }
 
+/* the server separates several errors with new lines. */
+#ad_psa_system_status_message {
+	white-space: pre-line;
+}
+
 #library_media_drop {
 	border: 2px dashed #888;
 	padding: 16px;
