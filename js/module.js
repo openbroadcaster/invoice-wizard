@@ -570,42 +570,23 @@ OBModules.OBAdPSASystemModule = new function()
   // displaying a tts area.
   this.tts_voice_init = function()
   {
+    OBModules.OBAdPSASystemModule.tts_request = null;
     OB.API.post('obadpsadsystemmodule', 'get_tts_voices', {}, function(res) {
-      console.log(res);
       if (res.status) {
-        let voices = res.data;
-        OBModules.OBAdPSASystemModule.set_data('tts_voices', JSON.stringify(voices));
-        voices.forEach((voice) => {
+        res.data.forEach((voice) => {
           OBModules.OBAdPSASystemModule.dropdown_add_item('voice', voice.voice_name);
         });
       } else {
         $('#ad_psa_system_tts_message').obWidget('error', res.msg);
       }
     });
-  }
-
-  // Updates voices from the local storage.
-  this.update_voices = function ()
-  {
-    let voices_select = document.getElementById('voice');
-    let gender = document.getElementById('gender').value;
-    let language = document.getElementById('language').value;
-    let voices = JSON.parse(OBModules.OBAdPSASystemModule.get_data('tts_voices'));
-    let voices_list = [];
-    let voice_subsets = [];
-    voices_select.innerHTML = '';
-    let language_sets = OBModules.OBAdPSASystemModule.get_data('language_sets').split(',');
-    language_sets.forEach(language_set => {
-    voices.forEach((voice) => {
-        if (language_set == voice.subset && gender == voice.gender &&
-          voices_list.includes(voice.voice_name) == false && language == voice.language) {
-          voices_list.push(voice.voice_name);
-        }
-      });
-    });
-    console.log('voices_list', voices_list);
-    voices_list.forEach(voice => {
-      OBModules.OBAdPSASystemModule.dropdown_add_item('voice', voice);
+    OB.API.post('obadpsadsystemmodule', 'get_bed_tracks', {}, function(res) {
+      if (res.status && res.data.length > 0) {
+        res.data.forEach((track) => {
+          OBModules.OBAdPSASystemModule.dropdown_add_item('bed_music', track);
+        });
+        document.getElementById('bed_music_row').style.display = '';
+      }
     });
   }
 
@@ -647,54 +628,10 @@ OBModules.OBAdPSASystemModule = new function()
   this.view_polly_tts_area = function()
   {
     OB.UI.replaceMain('modules/obadpsasystem/tts_area.html');
+    OBModules.OBAdPSASystemModule.fill_country_language();
+    OBModules.OBAdPSASystemModule.message_text_onload();
     OBModules.OBAdPSASystemModule.tts_voice_init();
   }
-
-  // Event handler for the selected langage being changed.
-  this.selected_language_changed = function()
-  {
-    let language = document.getElementById('language').value;
-    let language_sets = document.getElementById('language_sets');
-    language_sets.innerHTML = '';
-    switch (language) {
-    case 'English':
-      let options1 = ['Australian', 'British', 'Indian', 'US', 'Welsh'];
-      options1.forEach((option) => {
-        OBModules.OBAdPSASystemModule.dropdown_add_item('language_sets', option);
-      });
-      break;
-    case 'Spanish':
-      let options2 = ['European', 'Mexican', 'US Spanish'];
-      options2.forEach((option) => {
-        OBModules.OBAdPSASystemModule.dropdown_add_item('language_sets', option);
-      });
-      break;
-    case 'French':
-      let options3 = ['None', 'Canadian'];
-      options3.forEach((option) => {
-        OBModules.OBAdPSASystemModule.dropdown_add_item('language_sets', option);
-      });
-      break;
-    case 'Portuguese':
-      let options4 = ['Brazilian', 'European'];
-      options4.forEach((option) => {
-        OBModules.OBAdPSASystemModule.dropdown_add_item('language_sets', option);
-      });
-      break;
-  }
-
-  OBModules.OBAdPSASystemModule.update_voices();
-  }
-
-  // Event handler for the language subsets being changed.
-  this.selected_language_subsets_changed = function()
-  {
-    let language_sets = $('#language_sets').val();
-    OBModules.OBAdPSASystemModule.set_data('language_sets', language_sets);
-    OBModules.OBAdPSASystemModule.update_voices();
-
-  }
-
 
   // opens the screen to view companies.
 
@@ -1497,7 +1434,7 @@ OBModules.OBAdPSASystemModule = new function()
   this.start_page = function()
  	{
     // a new campaign starts with no creative picked (these keys live for the whole tab).
-    ['current_media_id', 'upload_media_id', 'library_media_id', 'library_media_label'].forEach((key) => {
+    ['current_media_id', 'upload_media_id', 'polly_media_id', 'library_media_id', 'library_media_label'].forEach((key) => {
       sessionStorage.removeItem(key);
     });
     OBModules.OBAdPSASystemModule.get_page('start.html', bypass_feild_check=true);
@@ -1664,6 +1601,13 @@ OBModules.OBAdPSASystemModule = new function()
       $('#ad_psa_system_status_message').obWidget('error', 'Please choose an audio file first.');
       return;
     }
+    OBModules.OBAdPSASystemModule.upload_creative(file, 'upload_media_id');
+  }
+
+  // Uploads a creative and saves it as a media item. media_key remembers it for its Media Type.
+
+  this.upload_creative = function(file, media_key)
+  {
     OB.UI.openModalWindow('modules/obadpsasystem/media_loader.html');
     // 5.4-develop's upload.php only accepts a nonce (5.4 ignores it), so get one first.
     OB.API.post('account', 'nonce', {'purpose': 'upload'}, function(res) {
@@ -1679,7 +1623,9 @@ OBModules.OBAdPSASystemModule = new function()
         cache: false,
         contentType: false,
         processData: false,
-        complete : OBModules.OBAdPSASystemModule.media_upload_done
+        complete : function(xhr) {
+          OBModules.OBAdPSASystemModule.media_upload_done(xhr, media_key);
+        }
       });
     });
   }
@@ -1717,7 +1663,7 @@ OBModules.OBAdPSASystemModule = new function()
     return res.msg || "Your AD/PSA couldn't be uploaded.";
   }
 
-  this.media_upload_done = function(xhr)
+  this.media_upload_done = function(xhr, media_key)
   {
     OB.UI.closeModalWindow();
     let response = null;
@@ -1755,13 +1701,16 @@ OBModules.OBAdPSASystemModule = new function()
       console.log(res);
       // Check if media was uploaded without error, else display a error.
       if (res.status) {
-        $('#ad_psa_system_status_message').obWidget('success', "Your AD/PSA is uploaded. Do not exit the wizard!");
+        let in_wizard = document.getElementById('next_btn') != null;
+        $('#ad_psa_system_status_message').obWidget('success', in_wizard ? "Your AD/PSA is uploaded. Do not exit the wizard!" : "Your AD/PSA is in the media library.");
         // store the saved media id so submit_invoice can link the creative to the campaign.
         OBModules.OBAdPSASystemModule.set_data('current_media_id', res.data);
-        OBModules.OBAdPSASystemModule.set_data('upload_media_id', res.data);
+        OBModules.OBAdPSASystemModule.set_data(media_key, res.data);
         // Reload the media sidebar after the upload is saved.
         OB.Sidebar.mediaSearch();
         OBModules.OBAdPSASystemModule.enable_next_btn();
+        // saved once: Play again only offers Submit if the audio changed.
+        document.getElementById('submit_audio_tts_btn').disabled = true;
       } else {
         $('#ad_psa_system_status_message').obWidget('error', OBModules.OBAdPSASystemModule.save_error_message(res));
       }
@@ -1796,7 +1745,7 @@ OBModules.OBAdPSASystemModule = new function()
   }
 
   // Points current_media_id at the creative picked for the current Media Type and sets
-  // the Next buttons to match. Polly keeps its own flow (its submit enables Next).
+  // the Next buttons to match.
 
   this.restore_media_selection = function()
   {
@@ -1804,6 +1753,8 @@ OBModules.OBAdPSASystemModule = new function()
     let media_id = null;
     if (audio_type == 'upload') {
       media_id = OBModules.OBAdPSASystemModule.get_data('upload_media_id');
+    } else if (audio_type == 'aws_tts') {
+      media_id = OBModules.OBAdPSASystemModule.get_data('polly_media_id');
     } else if (audio_type == 'library') {
       media_id = OBModules.OBAdPSASystemModule.get_data('library_media_id');
       if (media_id) {
@@ -1853,124 +1804,56 @@ OBModules.OBAdPSASystemModule = new function()
     $('#ad_psa_system_status_message').obWidget('success', 'Library item selected: ' + label);
   }
 
-  // Requests tts audio from AWS Polly.
+  // Generates the audio with AWS Polly and plays it. It's only generated
+  // again if something changed, since Polly charges per request.
 
   this.request_tts_audio = function()
   {
-    let voice = document.getElementById('voice').value;
-    let voice_name = voice.replace(/ \(Male\)| \(Female\)/g, '');
-    let last_voice = OBModules.OBAdPSASystemModule.get_data('last_voice');
-    let message_text = document.getElementById('message_text').value;
-    let last_message_text = OBModules.OBAdPSASystemModule.get_data('last_aws_polly_text');
-    let tts_speed = document.getElementById('tts_speed').value;
-    let last_tts_speed = OBModules.OBAdPSASystemModule.get_data('last_tts_speed');
-    let bed_music = document.getElementById('bed_music').value;
-    let submit_audio_tts_btn = document.getElementById('submit_audio_tts_btn');
-    if (bed_music == "") { bed_music = null; }
-    let bed_music_vol = document.getElementById('bed_music_vol').value;
-
-    if (last_message_text != message_text || last_tts_speed != tts_speed || last_voice != voice) {
-      OB.API.post('obadpsadsystemmodule', 'request_tts_audio', {
-        'voice': voice_name,
-        'text': message_text,
-        'speed': tts_speed,
-        'bed_music': bed_music,
-        'bed_music_vol': bed_music_vol
-      }, function(res) {
-        console.log(res);
-        if (res.status == false) {
-          $('#ad_psa_system_status_message').obWidget('error', res.msg);
-          submit_audio_tts_btn.disabled = true;
-        } else {
-          submit_audio_tts_btn.disabled = false;
-          let data = JSON.parse(res.data);
-          let file_path = data.file_path;
-          console.log(data);
-          OBModules.OBAdPSASystemModule.set_data('last_aws_polly_text', message_text);
-          OBModules.OBAdPSASystemModule.set_data('last_aws_polly_audio_filename', file_path);
-          OBModules.OBAdPSASystemModule.set_data('last_tts_speed', tts_speed);
-          OBModules.OBAdPSASystemModule.play_tts(mode='load');
-        }
-      });
-    } else {
-      OBModules.OBAdPSASystemModule.play_tts(mode='play');
+    let values = {
+      'voice': document.getElementById('voice').value,
+      'text': document.getElementById('message_text').value,
+      'speed': document.getElementById('tts_speed').value,
+      'bed_music': document.getElementById('bed_music').value,
+      'bed_music_vol': document.getElementById('bed_music_vol').value
+    };
+    let request = JSON.stringify(values);
+    if (request == OBModules.OBAdPSASystemModule.tts_request) {
+      OBModules.OBAdPSASystemModule.play_tts();
+      return;
     }
+    let submit_audio_tts_btn = document.getElementById('submit_audio_tts_btn');
+    submit_audio_tts_btn.disabled = true;
+    OB.API.post('obadpsadsystemmodule', 'request_tts_audio', values, function(res) {
+      if (res.status == false) {
+        OBModules.OBAdPSASystemModule.tts_request = null;
+        $('#ad_psa_system_status_message').obWidget('error', res.msg);
+        return;
+      }
+      let bytes = Uint8Array.from(atob(res.data), (char) => char.charCodeAt(0));
+      OBModules.OBAdPSASystemModule.tts_audio = new Blob([bytes], {type: 'audio/mpeg'});
+      OBModules.OBAdPSASystemModule.tts_request = request;
+      submit_audio_tts_btn.disabled = false;
+      $('#ad_psa_system_status_message').obWidget('success', 'Your audio is ready. Press Submit audio to save it.');
+      OBModules.OBAdPSASystemModule.play_tts();
+    });
   }
 
-  // Plays tts audio from AWS Polly.
-
-  this.play_tts = function(mode='play')
+  this.play_tts = function()
   {
-    let file_name = OBModules.OBAdPSASystemModule.get_data('last_aws_polly_audio_filename');
-    let submit_audio_tts_btn = document.getElementById('submit_audio_tts_btn');
-    let audio_player_area = document.getElementById('sidebar_player_draghere');
-    let url = 'modules/obadpsasystem/audio.php?filename=' + file_name;
-    if (mode == 'load') {
-      audio_player_area.innerHTML = `<audio id="audio_player" controls autoplay><source src="${url}" type="audio/wav"></audio>`;
-    }
     let audio_player = document.getElementById('audio_player');
+    URL.revokeObjectURL(audio_player.src);
+    audio_player.src = URL.createObjectURL(OBModules.OBAdPSASystemModule.tts_audio);
     audio_player.play();
   }
 
-  // Stops playback of AWS Polly audio, if any message is playing.
-
   this.stop_tts = function()
   {
-    let audio_player = document.getElementById('audio_player');
-    audio_player.pause();
+    document.getElementById('audio_player').pause();
   }
-
-  // Uploads final audio mix to the server.
 
   this.submit_audio_tts = function()
   {
-    let last_aws_polly_audio_filename = OBModules.OBAdPSASystemModule.get_data('last_aws_polly_audio_filename');
-    let creative = document.getElementById('creative').value;
-    let message_type = document.getElementById('message_type').value;
-    let tts_start_btn = document.getElementById('tts_start_btn');
-    let tts_stop_btn = document.getElementById('tts_stop_btn');
-    let has_ad_id = document.getElementById('has_ad_id').checked;
-    let standalone = document.getElementById('standalone').value;
-    let county = document.getElementById('country').value;
-    let ad_id = '';
-
-    console.log('has_ad_id', has_ad_id);
-
-    // Handle TTS standlone area.
-    if (has_ad_id != false) {
-      ad_id = document.getElementById('ad_id').value;
-    }
-    OB.API.post('obadpsadsystemmodule', 'submit_tts_audio', {
-      'audio_file': last_aws_polly_audio_filename,
-      'creative': creative,
-      'message_type': message_type,
-      'ad_id': ad_id,
-      'has_ad_id': has_ad_id,
-      'standalone': standalone,
-      'county': county
-    }, function(res) {
-      console.log(res);
-      if (res.status == true) {
-        $('#ad_psa_system_status_message').obWidget('success', res.msg);
-        tts_start_btn.disabled = true;
-        tts_stop_btn.disabled = true;
-        if (standalone) {
-          OBModules.OBAdPSASystemModule.enable_next_btn();
-        }
-        let response = JSON.parse(res.data);
-        OBModules.OBAdPSASystemModule.media = response;
-        let media = OBModules.OBAdPSASystemModule.media;
-        //let id = media['id'];
-        //OBModules.OBAdPSASystemModule.set_data('current_media_id', id);
-        let file_id = media['file_id'];
-        let id = media['file_id'];
-        let file_key = media['file_key'];
-      } else {
-        //alert("Your AD/PSA couldn't be uploaded! Please contact a system admin.");
-        //$('#ad_psa_system_status_message').obWidget('error', "Your AD/PSA couldn't be uploaded! Please contact a system admin.");
-        $('#ad_psa_system_status_message').obWidget('error', res.msg);
-      }
-    });
+    OBModules.OBAdPSASystemModule.upload_creative(OBModules.OBAdPSASystemModule.tts_audio, 'polly_media_id');
   }
 
   // Adds a event listener for handleing hiding/displaying the bed music volume control
@@ -2102,6 +1985,9 @@ OBModules.OBAdPSASystemModule = new function()
         // own keys: 'country' already holds the billing country from the start page.
         OBModules.OBAdPSASystemModule.set_data('media_country', document.getElementById('country').value);
         OBModules.OBAdPSASystemModule.set_data('media_language', document.getElementById('language').value);
+        ['voice', 'message_text', 'tts_speed', 'bed_music', 'bed_music_vol'].forEach((field) => {
+          OBModules.OBAdPSASystemModule.set_data(field, document.getElementById(field).value);
+        });
       }
       //let tmp_array = {};
       // for (var i = 0; i < OBModules.OBAdPSASystemModule.fields.length; i++) {
@@ -2340,6 +2226,8 @@ OBModules.OBAdPSASystemModule = new function()
           document.getElementById('message_text').value = OBModules.OBAdPSASystemModule.get_data('message_text');
           document.getElementById('tts_speed').value = OBModules.OBAdPSASystemModule.get_data('tts_speed');
           OBModules.OBAdPSASystemModule.fill_dropdown('bed_music', OBModules.OBAdPSASystemModule.get_data('bed_music'));
+          document.getElementById('bed_music_vol').value = OBModules.OBAdPSASystemModule.get_data('bed_music_vol');
+          OBModules.OBAdPSASystemModule.bed_music_handling();
           document.getElementById('country').value = OBModules.OBAdPSASystemModule.get_data('media_country') || '';
           document.getElementById('language').value = OBModules.OBAdPSASystemModule.get_data('media_language') || '';
           OBModules.OBAdPSASystemModule.fill_dropdown('message_type', OBModules.OBAdPSASystemModule.get_data('message_type'));

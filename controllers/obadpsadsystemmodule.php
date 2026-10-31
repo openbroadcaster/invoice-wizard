@@ -33,6 +33,7 @@ class OBAdPSADSystemModule extends OBFController
     parent::__construct();
     $this->AdsModel = $this->load->model('Ads');
     $this->SettingsModel = $this->load->model('Settings');
+    $this->TtsModel = $this->load->model('Tts');
     $this->PlayersModel = $this->load->model('Players');
     $this->media_model = $this->load->model('media');
     $this->uploads_model = $this->load->model('uploads');
@@ -45,7 +46,7 @@ class OBAdPSADSystemModule extends OBFController
 
   public function save_media()
   {
-    $this->user->require_permission('ad_psa_system_create_campaign');
+    $this->user->require_permission('ad_psa_system_create_campaign or ad_psa_system_create_tts_messages');
     $file_id = $this->data('file_id');
     $file_key = $this->data('file_key');
     $creative = $this->data('spot_name');
@@ -229,13 +230,10 @@ class OBAdPSADSystemModule extends OBFController
         $this->log('create_invoice', 'The media type is not valid.');
         return [false, 'The media type is not valid.'];
       }
-      // Polly campaigns don't link their media yet, so only check one when it's given.
-      if ((string) $media_type != '2' || !empty($media_file_id)) {
-        $media_error = $this->creative_media_error($media_file_id);
-        if ($media_error) {
-          $this->log('create_invoice', $media_error);
-          return [false, $media_error];
-        }
+      $media_error = $this->creative_media_error($media_file_id);
+      if ($media_error) {
+        $this->log('create_invoice', $media_error);
+        return [false, $media_error];
       }
       $campaign_name = $this->data('campaign_name');
       $buyer = $this->data('buyer');
@@ -384,7 +382,7 @@ class OBAdPSADSystemModule extends OBFController
               case 'US Spanish':
                 array_push($voices, array('voice_name' => 'Lupe', 'gender' => 'Female', 'subset' => 'US Spanish',
                 'language' => 'Spanish'));
-                array_push($voices, array('voice_name' => 'Penélope/Penelope', 'gender' => 'Female', 'subset' => 'US Spanish',
+                array_push($voices, array('voice_name' => 'Penelope', 'gender' => 'Female', 'subset' => 'US Spanish',
                 'language' => 'Spanish'));
                 array_push($voices, array('voice_name' => 'Miguel', 'gender' => 'Male', 'subset' => 'US Spanish',
                 'language' => 'Spanish'));
@@ -395,9 +393,9 @@ class OBAdPSADSystemModule extends OBFController
       foreach ($default_language_sets as $default_language_set) {
         switch ($default_language_set) {
             case 'None':
-              array_push($voices, array('voice_name' => 'Céline/Celine', 'gender' => 'Female', 'subset' => 'None',
+              array_push($voices, array('voice_name' => 'Celine', 'gender' => 'Female', 'subset' => 'None',
               'language' => 'French'));
-              array_push($voices, array('voice_name' => 'Léa', 'gender' => 'Female', 'subset' => 'None',
+              array_push($voices, array('voice_name' => 'Lea', 'gender' => 'Female', 'subset' => 'None',
               'language' => 'French'));
               array_push($voices, array('voice_name' => 'Mathieu', 'gender' => 'Male', 'subset' => 'None',
               'language' => 'French'));
@@ -410,17 +408,17 @@ class OBAdPSADSystemModule extends OBFController
       }
     } elseif ($default_language == 'Portuguese') {
       foreach ($default_language_sets as $default_language_set) {
-        switch ($default_language_sets) {
+        switch ($default_language_set) {
             case 'Brazilian':
               array_push($voices, array('voice_name' => 'Camila', 'gender' => 'Female', 'subset' => 'Brazilian',
               'language' => 'Portuguese'));
-              array_push($voices, array('voice_name' => 'Vitória/Vitoria', 'gender' => 'Female', 'subset' => 'Brazilian',
+              array_push($voices, array('voice_name' => 'Vitoria', 'gender' => 'Female', 'subset' => 'Brazilian',
               'language' => 'Portuguese'));
               array_push($voices, array('voice_name' => 'Ricardo', 'gender' => 'Male', 'subset' => 'Brazilian',
               'language' => 'Portuguese'));
               break;
             case 'European':
-              array_push($voices, array('voice_name' => 'Inês/Ines', 'gender' => 'Female', 'subset' => 'European',
+              array_push($voices, array('voice_name' => 'Ines', 'gender' => 'Female', 'subset' => 'European',
               'language' => 'Portuguese'));
               break;
         }
@@ -435,133 +433,40 @@ class OBAdPSADSystemModule extends OBFController
     }
   }
 
+  public function get_bed_tracks()
+  {
+    $this->user->require_permission('ad_psa_system_create_tts_messages');
+    return [true, '', $this->TtsModel->bed_tracks()];
+  }
+
+  // Returns the message's audio, base64 encoded. Nothing is kept on the server:
+  // the page plays it, and saving it goes through the normal media upload.
   public function request_tts_audio()
   {
     $this->user->require_permission('ad_psa_system_create_tts_messages');
-    $output = [];
     $voice = $this->data('voice');
     $speed = $this->data('speed');
     $text = $this->data('text');
-    $bed_music = $this->data('bed_music');
+    $bed_music = (string) $this->data('bed_music');
     $bed_music_vol = $this->data('bed_music_vol');
     // Handle invaild options, or no option selected errors.
     if (empty($voice) || $voice == '') return [false, "Please select a TTS langauge, lagauage set, and voice!", null];
     if (empty($speed) || $speed == '') return [false, "Please select a TTS speed!", null];
     if (empty($text) || $text == '') return [false, "Please type a message to speak!", null];
-    $aws_access_key_id = $this->SettingsModel->get_setting('aws_access_key_id');
-    //echo $aws_access_key_id;
-    $aws_secret_access_key = $this->SettingsModel->get_setting('aws_secret_access_key');
-    //echo $aws_secret_access_key;
-    //$aws_region_name = $this->data('aws_region_name');
-    $aws_region_name = $this->SettingsModel->get_setting('aws_region_name');
-    //$aws_region_name = 'us-east-1';
-    if (empty($aws_access_key_id) || empty($aws_secret_access_key)) {
+    $aws = ['key' => $this->SettingsModel->get_setting('aws_access_key_id'),
+            'secret' => $this->SettingsModel->get_setting('aws_secret_access_key'),
+            'region' => $this->SettingsModel->get_setting('aws_region_name')];
+    if (empty($aws['key']) || empty($aws['secret'])) {
       $this->log('request_tts_audio', 'Your tts request has failed! Please add your AWS API Keys for Polly TTS creation.');
       return [false, "Your tts request has failed! Please add your AWS API Keys for Polly TTS creation.", null];
     }
-    $cmd = 'PATH=/home/obsuser/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin modules/obadpsasystem/tts_backend.sh'. ' --voice '. $voice. ' --speed '. $speed. ' --text "'. $text. '" --aws_access_key_id "'. $aws_access_key_id. '" --aws_secret_access_key "'. $aws_secret_access_key. '" --aws_region_name "'. $aws_region_name. '" --music_bed_track "'. $bed_music. '" --music_bed_track_volume '. $bed_music_vol;
-    //exec(implode(" ", $cmd). " 2>&1", $output, $return_val);
-    exec($cmd. " 2>&1", $output, $return_val);
-    if ($return_val == 0) {
-      $this->log('request_tts_audio', 'Sent tts request!');
-      return [true, "Sent tts request!", implode(" ", $output)];
-    } else {
-      $this->log('request_tts_audio', 'Your tts request has failed!');
-      return [false, "Your tts request has failed!", null];
+    $audio = $this->TtsModel->generate($aws, $voice, $speed, $text, $bed_music, $bed_music_vol);
+    if (!$audio[0]) {
+      $this->log('request_tts_audio', 'Your tts request has failed! '. $audio[1]);
+      return [false, 'Your tts request has failed! '. $audio[1], null];
     }
-  }
-
-  public function submit_tts_audio()
-  {
-    $this->user->require_permission('ad_psa_system_create_campaign');
-    $audio_file = $this->data('audio_file');
-    $file_path = "/tmp/temp_media/". $audio_file;
-    $creative = $this->data('creative');
-    $message_type = $this->data('message_type');
-    $has_ad_id = $this->data('has_ad_id');
-    $ad_id = $this->data('ad_id');
-    $standalone = $this->data('standalone');
-    $county = $this->data('county');
-    if (empty($county) && $county == '') {
-      $this->log('submit_tts_audio', 'Failed to save the tts audio! Please select a county first.');
-      return [false, "Failed to save the tts audio! Please select a county first.", null];
-    }
-    if (empty($ad_id) && $has_ad_id == '') {
-      $this->log('submit_tts_audio', 'Failed to save the tts audio! Please enter a Ad-ID first.');
-      return [false, "Failed to save the tts audio! Please enter a Ad-ID first.", null];
-    }
-    if ($message_type == 'ad') {
-      // For now as a workaround to allow for the media to be in ad/psa category the ad message will
-      // use the PSA disabled code. This should be changed.
-      $genre_id = 994;
-      $category_id = 2;
-      $album = 'AD/PSA Messages';
-    } elseif ($message_type == 'psa') {
-      $genre_id = 995;
-      $category_id = 2;
-      $album = 'AD/PSA Messages';
-    } elseif ($message_type == 'other') {
-      $genre_id = 999;
-      $category_id = 10;
-      $album = 'AD/PSA/Other TTS Messages';
-    } else {
-      // This is a failsafe though we always get one of the values above,
-      // if for some reason we don't reject the request.
-      $this->log('submit_tts_audio', 'Failed to save the tts audio!');
-      return [false, "Failed to save the tts audio!", null];
-    }
-    $ch = curl_init("localhost/upload.php");
-
-    curl_setopt($ch, CURLOPT_POST, true);
-    $file = fopen($file_path, "r");
-    $data = fread($file, filesize($file_path));
-    fclose($file);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'Content-Type: application/octet-stream',
-    'Content-Length: ' . strlen($data))
-    );
-
-    $returned_data = curl_exec($ch);
-    //echo "returned_data ". $returned_data;
-    $json_data = json_decode($returned_data);
-
-    //$id = $json_data->id;
-    $file_id = $json_data->file_id;
-    $file_key = $json_data->file_key;
-
-    if(curl_error($ch)) {
-        $this->log('submit_tts_audio', 'Failed to save the tts audio!');
-        return [false, "Failed to save the tts audio! upload 1", curl_error($ch)];
-    } else {
-      //$file_info = $json_data->info->media_info;
-      $file_info = $this->uploads_model->file_info($file_id, $file_key);
-      // file info should be from media info in json from upload.php request data.
-      $item = array('file_id' => $file_id, 'file_key' => $file_key, 'artist' => 'AD System', 'title' => $creative, 'file_info' => $file_info, 'is_approved' => 1, 'is_copyright_owner' => 0, 'dynamic_select' => 0,'status' => 'public',
-      'category_id' => $category_id, 'genre_id' => $genre_id, 'year' => date('Y'), 'comments' => 'Ad-ID: '. $ad_id, 'album' => $album, 'country_id' => $county, 'language_id' => 54, 'local_id' => 2);
-      $data = $this->media_model->validate(array('item' => $item));
-      if ($data[0]) {
-        $this->media_model->save(array('item' => $item));
-        // If the media is saved in the server, then remove it from /tmp/temp_media/.
-        //$ch2 = curl_init('localhost/api.php');
-        //curl_setopt($ch2, CURLOPT_POSTFIELDS, "c=media&a=save&d=". json_encode($item). "appkey=". "Nw==:vzPEmI9uI4hk5awZFeeLQiLx4i1ApRAE7ywKc+rgkHw=");
-        //curl_setopt($ch2, CURLOPT_RETURNTRANSFER, 1);
-        //print_r(curl_exec($ch2));
-        unlink($file_path);
-        if ($standalone) {
-          $this->log('submit_tts_audio', 'Your audio has been uploaded. Do not exit the wizard!');
-          return [true, "Your audio has been uploaded.", $returned_data];
-        } else {
-          $this->log('submit_tts_audio', 'Your audio has been uploaded. Do not exit the wizard!');
-          return [true, "Your audio has been uploaded. Do not exit the wizard!", $returned_data];
-        }
-      } else {
-        $this->log('submit_tts_audio', 'Failed to save the tts audio!');
-        return [false, "Failed to save the tts audio! upload 2", $data[2]];
-      }
-    }
-    curl_close($ch);
+    $this->log('request_tts_audio', 'Sent tts request!');
+    return [true, "Sent tts request!", base64_encode($audio[2])];
   }
 
   /* get setting's value from the database, and return it. */

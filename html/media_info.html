@@ -61,10 +61,9 @@
 		</select>
 	</div>
 	<div id="polly_tts_area">
-		<!-- <div id="audio_player_area">
-			<audio id="audio_player"></audio>
-		</div> -->
-		<input style="display: none;" type="text" name="" id="standalone" value="false">
+		<div id="audio_player_area">
+			<audio id="audio_player" controls></audio>
+		</div>
 		<!-- <div class="fieldrow">
 			<label for="country">Country</label>
 			<select name="" id="country">
@@ -118,12 +117,10 @@
 			<option value="190"></option>
 			<option value="200" label="200%"></option>
     </datalist>
-		<div class="fieldrow">
+		<div class="fieldrow" id="bed_music_row" style="display: none;">
 			<label for="bed_music">Bed Music</label>
 			<select name="bed_music" id="bed_music" onchange="OBModules.OBAdPSASystemModule.bed_music_handling();">
-				<!-- Placeholder is in use until list of bed tracks are located. -->
-				<option value="None" selected>None</option>
-				<option value="bed_music/ForeverBelieve.mp3">Track one</option>
+				<option value="" selected>None</option>
 			</select>
 		</div>
 		<div class="fieldrow">
@@ -136,7 +133,7 @@
 			<label>Controls</label>
 			<button type="button" onclick="OBModules.OBAdPSASystemModule.request_tts_audio();" id="tts_start_btn">Play</button>
 			<button type="button" onclick="OBModules.OBAdPSASystemModule.stop_tts();" id="tts_stop_btn">Stop</button>
-			<button id="submit_audio_tts_btn" type="button" onclick="OBModules.OBAdPSASystemModule.submit_audio_tts();">Submit audio</button>
+			<button disabled id="submit_audio_tts_btn" type="button" onclick="OBModules.OBAdPSASystemModule.submit_audio_tts();">Submit audio</button>
 		</div>
 	</div>
 	<div id="audio_file_upload_area">
