@@ -450,7 +450,7 @@ class OBAdPSADSystemModule extends OBFController
     $bed_music = (string) $this->data('bed_music');
     $bed_music_vol = $this->data('bed_music_vol');
     // Handle invaild options, or no option selected errors.
-    if (empty($voice) || $voice == '') return [false, "Please select a TTS langauge, lagauage set, and voice!", null];
+    if (empty($voice) || $voice == '') return [false, "Please select a voice. If the list is empty, set the default language and language sets in the AD/PSA system settings.", null];
     if (empty($speed) || $speed == '') return [false, "Please select a TTS speed!", null];
     if (empty($text) || $text == '') return [false, "Please type a message to speak!", null];
     $aws = ['key' => $this->SettingsModel->get_setting('aws_access_key_id'),

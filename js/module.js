@@ -1138,8 +1138,10 @@ OBModules.OBAdPSASystemModule = new function()
     let drive_hourly_rate = document.getElementById('drive_hourly_rate').value;
     let ros_hourly_rate = document.getElementById('ros_hourly_rate').value;
     let country = document.getElementById('default_country').value;
-    let default_language = OBModules.OBAdPSASystemModule.get_data('default_language');
-    let default_language_subsets = OBModules.OBAdPSASystemModule.get_data('language_sets');
+    // read from the form: sessionStorage only has these if they were changed in this tab.
+    let default_language = document.getElementById('default_language').value;
+    let default_language_subsets = OBModules.OBAdPSASystemModule.selected_options('language_sets');
+    OBModules.OBAdPSASystemModule.update_enabled_languages();
     let enabled_languages = OBModules.OBAdPSASystemModule.get_data('enabled_languages');
     let hst_number = document.getElementById('hst_number').value;
     console.log('Saving settings...');
