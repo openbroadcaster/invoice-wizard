@@ -18,6 +18,12 @@ class AdvertiserModel extends OBFModel
 
   public function get($sort_col='name', $sort_dir='asc')
   {
+    // only the columns the advertisers page sorts by, and asc or desc, reach the query.
+    $allowed_sort = ['name', 'trade_name', 'website', 'local_location', 'country', 'type', 'industry'];
+    if (!is_string($sort_col) || !in_array($sort_col, $allowed_sort, true)) {
+      $sort_col = 'name';
+    }
+    $sort_dir = (is_string($sort_dir) && strtolower($sort_dir) === 'desc') ? 'desc' : 'asc';
     $this->db->orderby($sort_col, $sort_dir);
     $data = $this->db->get('module_ad_system_advertisers');
     echo $this->db->error();

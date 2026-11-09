@@ -145,6 +145,7 @@ class OBAdPSADSystemModule extends OBFController
 
   public function save_station_logo()
   {
+    $this->user->require_permission('ad_psa_system_change_system_settings');
 
     $media_id = $this->data('media-id');
 
@@ -175,6 +176,7 @@ class OBAdPSADSystemModule extends OBFController
 
   public function get_next_invoice_number()
   {
+    $this->user->require_permission('ad_psa_system_create_campaign');
     $invoices = $this->AdsModel->get_invoices();
     // Return 1 if there isn't any invoices. Otherwise return the last invoice_number plus 1.
     if ($invoices == false) {
@@ -524,6 +526,8 @@ class OBAdPSADSystemModule extends OBFController
 
   public function get_all_devices()
   {
+    // only names and ids, for pages under four different permissions, so a login is enough.
+    $this->user->require_authenticated();
     $output = [];
     $players = $this->PlayersModel->get_all();
     if ($players == False) {
@@ -749,6 +753,8 @@ class OBAdPSADSystemModule extends OBFController
   /* Gets a list of buyers */
   public function get_buyers()
   {
+    // the buyers page, and the wizard's first page.
+    $this->user->require_permission('ad_psa_system_create_campaign or ad_psa_system_change_add_edit_remove_buyers');
     $sort_col = $this->data('sort_col');
     if ($sort_col == null) {
       $sort_col = 'name';
@@ -769,6 +775,7 @@ class OBAdPSADSystemModule extends OBFController
   /* Gets all data for the equested buyer */
   public function get_buyer()
   {
+    $this->user->require_permission('ad_psa_system_create_campaign or ad_psa_system_change_add_edit_remove_buyers');
     $id = $this->data('id');
     $buyer = $this->buyers_model->get_one($id);
     if ($buyer != null) {
@@ -913,6 +920,7 @@ class OBAdPSADSystemModule extends OBFController
 
   public function get_companines()
   {
+    $this->user->require_permission('ad_psa_system_change_add_edit_remove_company');
     $sort_col = $this->data('sort_col');
     if ($sort_col == null) {
       $sort_col = 'name';
@@ -932,6 +940,7 @@ class OBAdPSADSystemModule extends OBFController
 
   public function get_company()
   {
+    $this->user->require_permission('ad_psa_system_change_add_edit_remove_company');
     $id = $this->data('id');
     $company = $this->company_model->get($id);
     if ($company != null) {
