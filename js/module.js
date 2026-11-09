@@ -474,18 +474,17 @@ OBModules.OBAdPSASystemModule = new function()
       let company_zip_code = document.getElementById('company_zip_code');
       let company_country = document.getElementById('country');
       OB.API.post('obadpsadsystemmodule', 'get_company', {'id': id}, function(res) {
-        let data = res.data;
-        data.forEach(entry => {
-          if (entry.id == id) {
-            company_name.value = entry.name;
-            company_phone.value = entry.phone;
-            company_street_address.value = entry.street_addr;
-            company_city.value = entry.city;
-            company_state_prov.value = entry.state_prov;
-            company_zip_code.value = entry.zip_code;
-            company_country.value = entry.country;
-          }
-        });
+        if (!res.status) {
+          return;
+        }
+        let entry = res.data;
+        company_name.value = entry.name;
+        company_phone.value = entry.phone;
+        company_street_address.value = entry.street_addr;
+        company_city.value = entry.city;
+        company_state_prov.value = entry.state_prov;
+        company_zip_code.value = entry.zip_code;
+        company_country.value = entry.country;
       });
     }, 500);
   }

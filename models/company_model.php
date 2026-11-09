@@ -10,7 +10,7 @@ class CompanyModel extends OBFModel
   {
     $this->db->where('id', $id);
     $data = $this->db->get_one('module_ad_system_companies');
-    if ($this->db->error != '') {
+    if ($this->db->error() != '') {
       echo $this->db->error();
       return null;
     }

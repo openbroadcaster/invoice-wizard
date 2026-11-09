@@ -942,7 +942,7 @@ class OBAdPSADSystemModule extends OBFController
   {
     $this->user->require_permission('ad_psa_system_change_add_edit_remove_company');
     $id = $this->data('id');
-    $company = $this->company_model->get($id);
+    $company = $this->company_model->get_one($id);
     if ($company != null) {
       $this->log('get_company', 'Company with id: '. $id. ' returned');
       return [true, null, $company];
