@@ -1508,6 +1508,13 @@ OBModules.OBAdPSASystemModule = new function()
     let language = document.getElementById('language');
     OB.Settings.countries.forEach((item) => country.add(new Option(item.name, item.country_id)));
     OB.Settings.languages.forEach((item) => language.add(new Option(item.ref_name, item.language_id)));
+    // start on the default country from the settings (saved as a code like CA), unless one is picked already.
+    OB.API.post('obadpsadsystemmodule', 'get_default_country', {}, function(res) {
+      let match = OB.Settings.countries.find((item) => res.data && item.alpha2 == res.data);
+      if (res.status && match && country.value == '') {
+        country.value = match.country_id;
+      }
+    });
   }
 
   // Opens the start page of the Wizard. This should load on module startup.
@@ -1679,7 +1686,7 @@ OBModules.OBAdPSASystemModule = new function()
   {
     let file = $('#audio_file')[0].files[0];
     if (!file) {
-      $('#ad_psa_system_status_message').obWidget('error', 'Please choose an audio file first.');
+      $('#upload_message').obWidget('error', 'Please choose an audio file first.');
       return;
     }
     OBModules.OBAdPSASystemModule.upload_creative(file, 'upload_media_id');
@@ -1689,12 +1696,19 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.upload_creative = function(file, media_key)
   {
+    let message = OBModules.OBAdPSASystemModule.media_message(media_key);
+    // save_media refuses these after the upload, which leaves the file behind, so check them first.
+    let missing = OBModules.OBAdPSASystemModule.missing_media_field();
+    if (missing) {
+      $(message).obWidget('error', missing);
+      return;
+    }
     OB.UI.openModalWindow('modules/obadpsasystem/media_loader.html');
     // 5.4-develop's upload.php only accepts a nonce (5.4 ignores it), so get one first.
     OB.API.post('account', 'nonce', {'purpose': 'upload'}, function(res) {
       if (!res.status || !res.data.nonce) {
         OB.UI.closeModalWindow();
-        $('#ad_psa_system_status_message').obWidget('error', 'Upload failed: the server did not allow the upload.');
+        $(message).obWidget('error', 'Upload failed: the server did not allow the upload.');
         return;
       }
       $.ajax({
@@ -1709,6 +1723,29 @@ OBModules.OBAdPSASystemModule = new function()
         }
       });
     });
+  }
+
+  // The message beside the Submit button for this Media Type.
+
+  this.media_message = function(media_key)
+  {
+    return media_key == 'upload_media_id' ? '#upload_message' : '#polly_message';
+  }
+
+  // Returns why save_media would refuse the creative, in its order, or null.
+
+  this.missing_media_field = function()
+  {
+    if (document.getElementById('country').value == '') {
+      return 'Please select a country first.';
+    }
+    if (document.getElementById('creative').value == '') {
+      return 'Please enter a creative name first.';
+    }
+    if (document.getElementById('message_type').value == '') {
+      return 'Please select a Message Type first.';
+    }
+    return null;
   }
 
   // Returns why an upload.php reply failed, or null if the upload worked.
@@ -1753,9 +1790,10 @@ OBModules.OBAdPSASystemModule = new function()
     } catch (e) {
       // not JSON (e.g. a web server error page), reported below.
     }
+    let message = OBModules.OBAdPSASystemModule.media_message(media_key);
     let error = OBModules.OBAdPSASystemModule.upload_error_message(xhr.status, response);
     if (error) {
-      $('#ad_psa_system_status_message').obWidget('error', error);
+      $(message).obWidget('error', error);
       return;
     }
     OBModules.OBAdPSASystemModule.media = response;
@@ -1783,7 +1821,7 @@ OBModules.OBAdPSASystemModule = new function()
       // Check if media was uploaded without error, else display a error.
       if (res.status) {
         let in_wizard = document.getElementById('next_btn') != null;
-        $('#ad_psa_system_status_message').obWidget('success', in_wizard ? "Your AD/PSA is uploaded. Do not exit the wizard!" : "Your AD/PSA is in the media library.");
+        $(message).obWidget('success', in_wizard ? "Your AD/PSA is uploaded. Do not exit the wizard!" : "Your AD/PSA is in the media library.");
         // store the saved media id so submit_invoice can link the creative to the campaign.
         OBModules.OBAdPSASystemModule.set_data('current_media_id', res.data);
         OBModules.OBAdPSASystemModule.set_data(media_key, res.data);
@@ -1793,7 +1831,7 @@ OBModules.OBAdPSASystemModule = new function()
         // saved once: Play again only offers Submit if the audio changed.
         document.getElementById('submit_audio_tts_btn').disabled = true;
       } else {
-        $('#ad_psa_system_status_message').obWidget('error', OBModules.OBAdPSASystemModule.save_error_message(res));
+        $(message).obWidget('error', OBModules.OBAdPSASystemModule.save_error_message(res));
       }
     });
   }
@@ -2317,7 +2355,8 @@ OBModules.OBAdPSASystemModule = new function()
           OBModules.OBAdPSASystemModule.fill_dropdown('bed_music', OBModules.OBAdPSASystemModule.get_data('bed_music'));
           document.getElementById('bed_music_vol').value = OBModules.OBAdPSASystemModule.get_data('bed_music_vol');
           OBModules.OBAdPSASystemModule.bed_music_handling();
-          document.getElementById('country').value = OBModules.OBAdPSASystemModule.get_data('media_country') || '';
+          // only a saved choice replaces the default country.
+          OBModules.OBAdPSASystemModule.fill_dropdown('country', OBModules.OBAdPSASystemModule.get_data('media_country'));
           document.getElementById('language').value = OBModules.OBAdPSASystemModule.get_data('media_language') || '';
           OBModules.OBAdPSASystemModule.fill_dropdown('message_type', OBModules.OBAdPSASystemModule.get_data('message_type'));
           OBModules.OBAdPSASystemModule.selected_audio_type();

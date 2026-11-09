@@ -492,6 +492,14 @@ class OBAdPSADSystemModule extends OBFController
     }
   }
 
+  /* get the default country for new creatives. get_setting is admin only, and the wizard's users need this one. */
+
+  public function get_default_country()
+  {
+    $this->user->require_permission('ad_psa_system_create_campaign or ad_psa_system_create_tts_messages');
+    return [true, "Default country returned.", $this->SettingsModel->get_setting('default_country')];
+  }
+
   /* update a setting's value in the database. */
 
   public function update_setting()

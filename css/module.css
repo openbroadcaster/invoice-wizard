@@ -187,7 +187,7 @@ MIT Licensed
 }
 
 /* the server separates several errors with new lines. */
-#ad_psa_system_status_message {
+#ad_psa_system_status_message, #upload_message, #polly_message {
 	white-space: pre-line;
 }
 
