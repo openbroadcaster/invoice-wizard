@@ -484,7 +484,8 @@ class OBAdPSADSystemModule extends OBFController
 
     $value = $this->SettingsModel->get_setting($setting_name);
     if ($value != null) {
-      $this->log('get_setting', $setting_name. ', value: '. $value .' returned.');
+      // never log the value, the settings include the AWS and Stripe secrets.
+      $this->log('get_setting', $setting_name. ' returned.');
       return [true, "Settings value returned.", $value];
     } else {
       $this->log('get_setting', $setting_name. ', value: '. 'null' .' returned.');
@@ -515,7 +516,7 @@ class OBAdPSADSystemModule extends OBFController
 
     /* update the setting value. */
     $this->SettingsModel->update_setting($setting_name, $setting_value);
-    $this->log('update_setting', 'setting: '. $setting_name, ' was updated with value: '. $setting_value);
+    $this->log('update_setting', 'setting: '. $setting_name. ' was updated.');
     return [true, "Settings updated.", null];
   }
 
@@ -1202,6 +1203,8 @@ class OBAdPSADSystemModule extends OBFController
 
     public function get_logs()
     {
+      // the module has no logs permission, so the logs go with its settings.
+      $this->user->require_permission('ad_psa_system_change_system_settings');
       $sort_col = $this->data('sort_col');
       if ($sort_col == null) {
         $sort_col = 'method';

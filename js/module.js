@@ -77,7 +77,11 @@ OBModules.OBAdPSASystemModule = new function()
        }
      });
      OB.UI.addSubMenuItem('ad_system', 'advertisers', 'ad_psa_system_view_advertisers', OBModules.OBAdPSASystemModule.view_advertisers, 1);
-     OB.UI.addSubMenuItem('ad_system', 'logs', 'ad_psa_system_view_logs', OBModules.OBAdPSASystemModule.view_logs, 1);
+     OB.API.post('obadpsadsystemmodule', 'permissons_check', {'name': 'ad_psa_system_change_system_settings'}, function(res) {
+       if (res.status) {
+         OB.UI.addSubMenuItem('ad_system', 'logs', 'ad_psa_system_view_logs', OBModules.OBAdPSASystemModule.view_logs, 1);
+       }
+     });
   }
 
   // Disables all buttons in the wizard (Doesn't include modals).
