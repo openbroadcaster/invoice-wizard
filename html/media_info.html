@@ -9,10 +9,10 @@
 <obwidget type="message" id="ad_psa_system_status_message"></obwidget>
 <div class="Wizard_nav">
 	<div class="nav_status">
-		page 2 of 4
+		page 2 of 3
 	</div>
-	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('start.html', true);">Back</button>
-	<button type="button" id="next_btn" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.save_data('media_info.html', 'review1.html');" disabled>Next</button>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('start.html', 'media_info.html');">Back</button>
+	<button type="button" id="next_btn" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.save_data('media_info.html', 'review.html');" disabled>Next</button>
 </div>
 <fieldset>
 	<legend>
@@ -38,7 +38,7 @@
 			<option value="aws_tts">AWS Polly TTS</option>
 		</select>
 	</div>
-	<div class="fieldrow">
+	<div class="fieldrow" id="message_type_row">
 		<label for="message_type">Message Type</label>
 		<!-- <select name="message_type" id="message_type" onchange="OBModules.OBAdPSASystemModule.selected_audio_type();" required> -->
 		<select name="message_type" id="message_type" onchange="OBModules.OBAdPSASystemModule.selected_audio_type();" required>
@@ -154,8 +154,8 @@
 </fieldset>
 <div class="Wizard_nav">
 	<div class="nav_status">
-		page 2 of 4
+		page 2 of 3
 	</div>
-	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('start.html', true);">Back</button>
-	<button type="button" id="next_btn" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.save_data('media_info.html', 'review1.html');" disabled>Next</button>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('start.html', 'media_info.html');">Back</button>
+	<button type="button" id="next_btn" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.save_data('media_info.html', 'review.html');" disabled>Next</button>
 </div>

@@ -654,20 +654,33 @@ OBModules.OBAdPSASystemModule = new function()
   {
     OBModules.OBAdPSASystemModule.tts_request = null;
     OB.API.post('obadpsadsystemmodule', 'get_tts_voices', {}, function(res) {
+      // the page was left before the reply came.
+      if (document.getElementById('voice') == null) {
+        return;
+      }
       if (res.status) {
         res.data.forEach((voice) => {
           OBModules.OBAdPSASystemModule.dropdown_add_item('voice', voice.voice_name);
         });
+        OBModules.OBAdPSASystemModule.list_loaded('voice');
       } else {
         $('#ad_psa_system_tts_message').obWidget('error', res.msg);
       }
     });
     OB.API.post('obadpsadsystemmodule', 'get_bed_tracks', {}, function(res) {
+      // the page was left before the reply came.
+      if (document.getElementById('bed_music') == null) {
+        return;
+      }
       if (res.status && res.data.length > 0) {
         res.data.forEach((track) => {
           OBModules.OBAdPSASystemModule.dropdown_add_item('bed_music', track);
         });
         document.getElementById('bed_music_row').style.display = '';
+        // a saved track shows its volume once picked.
+        if (OBModules.OBAdPSASystemModule.list_loaded('bed_music')) {
+          OBModules.OBAdPSASystemModule.bed_music_handling();
+        }
       }
     });
   }
@@ -1428,12 +1441,21 @@ OBModules.OBAdPSASystemModule = new function()
     });
     //setTimeout(OBModules.OBAdPSASystemModule.load_buyers, 100);
     setTimeout(() => {
-      document.getElementById('start_date').value = OBModules.OBAdPSASystemModule.get_date(now=true);
-      document.getElementById('stop_date').value = OBModules.OBAdPSASystemModule.get_date(now=false);
+      // defaults for a new campaign only: a page this campaign saved has its dates back already (restore_page).
+      if (document.getElementById('start_date').value == '') {
+        document.getElementById('start_date').value = OBModules.OBAdPSASystemModule.get_date(now=true);
+      }
+      if (document.getElementById('stop_date').value == '') {
+        document.getElementById('stop_date').value = OBModules.OBAdPSASystemModule.get_date(now=false);
+      }
       $("#start_date").datepicker({ dateFormat: 'yy-mm-dd' });
       $("#stop_date").datepicker({ dateFormat: 'yy-mm-dd' });
     }, 500);
     OB.API.post('obadpsadsystemmodule', 'get_all_devices', {}, function(res) {
+      // the page was left before the reply came.
+      if (document.getElementById('stations') == null) {
+        return;
+      }
       //console.log(res.data);
       if (res.status) {
         let json_data = JSON.parse(res.data);
@@ -1448,12 +1470,17 @@ OBModules.OBAdPSASystemModule = new function()
           option.value = device_id;
           stations_select.add(option);
         });
+        OBModules.OBAdPSASystemModule.list_loaded('stations');
       } else {
         $('#ad_psa_system_status_message').obWidget('error', res.msg);
         OBModules.OBAdPSASystemModule.disable_all_btns();
       }
     });
     OB.API.post('obadpsadsystemmodule', 'get_advertisers', {}, function(res) {
+      // the page was left before the reply came.
+      if (document.getElementById('advertiser') == null) {
+        return;
+      }
       res.data.forEach((advertiser) => {
         let advertiser_id = advertiser.id;
         let advertiser_name = advertiser.name;
@@ -1463,6 +1490,7 @@ OBModules.OBAdPSASystemModule = new function()
         option.value = advertiser_id;
         advertiser_select.add(option);
       });
+      OBModules.OBAdPSASystemModule.list_loaded('advertiser');
     });
   }
 
@@ -1470,8 +1498,12 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.load_current_top_screen_values = function ()
   {
-    document.getElementById('current_advertiser').innerHTML = OBModules.OBAdPSASystemModule.get_data('advertiser');
-    document.getElementById('current_buyer').innerHTML = OBModules.OBAdPSASystemModule.get_data('buyer');
+    // page 2 sets it a moment after it opens, so it may have been left already.
+    if (document.getElementById('current_advertiser') == null) {
+      return;
+    }
+    document.getElementById('current_advertiser').textContent = OBModules.OBAdPSASystemModule.review_value('advertiser');
+    document.getElementById('current_buyer').textContent = OBModules.OBAdPSASystemModule.review_value('buyer');
   }
 
   // Returns date for today, or 3o days after today.
@@ -1524,12 +1556,16 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.start_page = function()
  	{
-    // a new campaign starts with no creative picked (these keys live for the whole tab).
-    ['current_media_id', 'upload_media_id', 'polly_media_id', 'library_media_id', 'library_media_label'].forEach((key) => {
+    // a new campaign starts empty (these keys live for the whole tab): no page saved to put
+    // back (restore_page), no notes and no creative picked.
+    ['saved_start.html', 'saved_media_info.html', 'campaign_notes',
+     'current_media_id', 'upload_media_id', 'polly_media_id', 'library_media_id', 'library_media_label',
+     'upload_media_id_fields', 'polly_media_id_fields'].forEach((key) => {
       sessionStorage.removeItem(key);
     });
+    // get_page sets the page up once it's in (start_page_data_init); setting it up here as
+    // well asked for the lists twice, and a slow reply listed the stations and advertisers twice.
     OBModules.OBAdPSASystemModule.get_page('start.html', bypass_feild_check=true);
-    OBModules.OBAdPSASystemModule.start_page_data_init();
     setTimeout(OBModules.OBAdPSASystemModule.get_page_fields, 2000);
     //OBModules.OBAdPSASystemModule.change_page_items_state(false);
     //$('#layout_main').html(OBModules.OBAdPSASystemModule.html);
@@ -1560,6 +1596,10 @@ OBModules.OBAdPSASystemModule = new function()
   this.load_buyers = function()
   {
     OB.API.post('obadpsadsystemmodule', 'get_buyers', {'sort_col': 'name'}, function(res) {
+      // the page was left before the reply came.
+      if (document.getElementById('select_existing_buyer') == null) {
+        return;
+      }
       console.log(res.data);
       res.data.forEach((buyer) => {
         let buyer_id = buyer.id;
@@ -1735,7 +1775,17 @@ OBModules.OBAdPSASystemModule = new function()
     return media_key == 'upload_media_id' ? '#upload_message' : '#polly_message';
   }
 
-  // Returns why save_media would refuse the creative, in its order, or null.
+  // Whether the creative goes without an Ad-ID: "I don't have a Ad-ID" ticked on page 2.
+  // The Polly page doesn't ask for one (its has_ad_id is a hidden field), so none there.
+
+  this.no_ad_id = function()
+  {
+    let box = document.getElementById('has_ad_id');
+    return box.type == 'hidden' || box.checked;
+  }
+
+  // Returns why the creative can't be saved yet (save_media's refusals in its order,
+  // and the Ad-ID format Next checks), or null.
 
   this.missing_media_field = function()
   {
@@ -1744,6 +1794,14 @@ OBModules.OBAdPSASystemModule = new function()
     }
     if (document.getElementById('creative').value == '') {
       return 'Please enter a creative name first.';
+    }
+    let ad_id = document.getElementById('ad_id').value;
+    if (!OBModules.OBAdPSASystemModule.no_ad_id() && ad_id == '') {
+      return 'Please enter a Ad-ID first.';
+    }
+    // Next checks the same format (verify_invoice_data), so the saved creative never needs a fixed Ad-ID.
+    if (!OBModules.OBAdPSASystemModule.no_ad_id() && ad_id != 'NA' && !/^[1-9A-Za-z][0-9A-Za-z]{3}[0-9]{7}[HD]?$/.test(ad_id)) {
+      return 'The Ad-ID is invalid: it should look like ABCD1234000H.';
     }
     if (document.getElementById('message_type').value == '') {
       return 'Please select a Message Type first.';
@@ -1809,16 +1867,11 @@ OBModules.OBAdPSASystemModule = new function()
     let message_type = document.getElementById('message_type').value;
     let country = document.getElementById('country').value;
     let language = document.getElementById('language').value;
-    let has_ad_id = document.getElementById('has_ad_id').checked;
-    if (has_ad_id != false) {
-      ad_id = document.getElementById('ad_id').value;
-    }
-    if (has_ad_id) {
-      has_ad_id = false;
-    }
+    let has_ad_id = !OBModules.OBAdPSASystemModule.no_ad_id();
 
     let values = {'file_key': file_key, 'file_id': file_id, 'id': id, 'spot_name': creative,
                   'ad_id': ad_id, 'message_type': message_type, 'has_ad_id': has_ad_id, 'country': country, 'language': language};
+    let saved_with = OBModules.OBAdPSASystemModule.media_fields(media_key == 'polly_media_id' ? OBModules.OBAdPSASystemModule.tts_request : null);
     OB.API.post('obadpsadsystemmodule', 'save_media', values, function(res) {
       console.log(res);
       // Check if media was uploaded without error, else display a error.
@@ -1828,6 +1881,7 @@ OBModules.OBAdPSASystemModule = new function()
         // store the saved media id so submit_invoice can link the creative to the campaign.
         OBModules.OBAdPSASystemModule.set_data('current_media_id', res.data);
         OBModules.OBAdPSASystemModule.set_data(media_key, res.data);
+        OBModules.OBAdPSASystemModule.set_data(media_key + '_fields', saved_with);
         // Reload the media sidebar after the upload is saved.
         OB.Sidebar.mediaSearch();
         OBModules.OBAdPSASystemModule.enable_next_btn();
@@ -1837,6 +1891,49 @@ OBModules.OBAdPSASystemModule = new function()
         $(message).obWidget('error', OBModules.OBAdPSASystemModule.save_error_message(res));
       }
     });
+  }
+
+  // What page 2 gives a saved creative: its name and the details save_media stores,
+  // plus for Polly the settings its audio was made with (audio: a tts_request).
+  // With no Ad-ID (no_ad_id) it's N/A, whatever the Ad-ID field shows (Next puts NA in it).
+
+  this.media_fields = function(audio = null)
+  {
+    let fields = ['creative', 'message_type', 'country', 'language'].map((id) => document.getElementById(id).value);
+    fields.push(OBModules.OBAdPSASystemModule.no_ad_id() ? 'N/A' : document.getElementById('ad_id').value);
+    if (audio !== null) {
+      fields.push(audio);
+    }
+    return JSON.stringify(fields);
+  }
+
+  // Whether page 2 still shows what this Media Type's creative was saved with.
+  // Nothing saved yet has nothing to differ from.
+
+  this.media_matches = function(media_key)
+  {
+    let saved = OBModules.OBAdPSASystemModule.get_data(media_key + '_fields');
+    if (saved === null) {
+      return true;
+    }
+    let audio = media_key == 'polly_media_id' ? JSON.stringify(OBModules.OBAdPSASystemModule.tts_values()) : null;
+    return saved == OBModules.OBAdPSASystemModule.media_fields(audio);
+  }
+
+  // Next on page 2: the campaign gets the creative as saved, so a page changed since
+  // then is refused with what to do. Returns true when Next can go on.
+
+  this.creative_saved_as_shown = function()
+  {
+    let audio_type = document.getElementById('audio_type').value;
+    let media_key = {'upload': 'upload_media_id', 'aws_tts': 'polly_media_id'}[audio_type];
+    if (!media_key || OBModules.OBAdPSASystemModule.media_matches(media_key)) {
+      return true;
+    }
+    $('#ad_psa_system_status_message').obWidget('error', audio_type == 'aws_tts'
+      ? 'You changed this page after saving the audio. Press Play, then Submit audio, so the campaign gets it as shown.'
+      : 'You changed this page after uploading the audio. Submit audio again so the campaign gets it as shown.');
+    return false;
   }
 
   this.media_check = function()
@@ -1853,9 +1950,10 @@ OBModules.OBAdPSASystemModule = new function()
     document.getElementById('audio_file_upload_area').style.display = audio_type == 'upload' ? 'block' : 'none';
     document.getElementById('polly_tts_area').style.display = audio_type == 'aws_tts' ? 'block' : 'none';
     document.getElementById('library_media_area').style.display = audio_type == 'library' ? 'block' : 'none';
-    // country/language describe new media (uploads, Polly), not an existing library item.
+    // message type/country/language describe new media (uploads, Polly), not an existing library item.
     document.getElementById('country_row').style.display = audio_type == 'library' ? 'none' : '';
     document.getElementById('language_row').style.display = audio_type == 'library' ? 'none' : '';
+    document.getElementById('message_type_row').style.display = audio_type == 'library' ? 'none' : '';
   }
 
   // Media Type changed: show its area and bring back the creative already picked for it.
@@ -1937,16 +2035,14 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.request_tts_audio = function()
   {
-    let values = {
-      'voice': document.getElementById('voice').value,
-      'text': document.getElementById('message_text').value,
-      'speed': document.getElementById('tts_speed').value,
-      'bed_music': document.getElementById('bed_music').value,
-      'bed_music_vol': document.getElementById('bed_music_vol').value
-    };
+    let values = OBModules.OBAdPSASystemModule.tts_values();
     let request = JSON.stringify(values);
     if (request == OBModules.OBAdPSASystemModule.tts_request) {
       OBModules.OBAdPSASystemModule.play_tts();
+      // the same audio, but the page changed since it was saved (its name, country...): offer Submit again.
+      if (!OBModules.OBAdPSASystemModule.media_matches('polly_media_id')) {
+        document.getElementById('submit_audio_tts_btn').disabled = false;
+      }
       return;
     }
     let submit_audio_tts_btn = document.getElementById('submit_audio_tts_btn');
@@ -1981,7 +2077,25 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.submit_audio_tts = function()
   {
+    // Submit saves the audio from the last Play, so settings changed since then wouldn't be in it.
+    if (JSON.stringify(OBModules.OBAdPSASystemModule.tts_values()) != OBModules.OBAdPSASystemModule.tts_request) {
+      $('#polly_message').obWidget('error', 'Press Play first: the audio is from before your last changes.');
+      return;
+    }
     OBModules.OBAdPSASystemModule.upload_creative(OBModules.OBAdPSASystemModule.tts_audio, 'polly_media_id');
+  }
+
+  // Polly's settings on the page, as Play sends them.
+
+  this.tts_values = function()
+  {
+    return {
+      'voice': OBModules.OBAdPSASystemModule.field_value('voice'),
+      'text': document.getElementById('message_text').value,
+      'speed': document.getElementById('tts_speed').value,
+      'bed_music': OBModules.OBAdPSASystemModule.field_value('bed_music'),
+      'bed_music_vol': document.getElementById('bed_music_vol').value
+    };
   }
 
   // Adds a event listener for handleing hiding/displaying the bed music volume control
@@ -2047,76 +2161,16 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.save_data = async function(current_page, next_page)
   {
+    if (current_page == 'media_info.html' && !OBModules.OBAdPSASystemModule.creative_saved_as_shown()) {
+      return;
+    }
     OBModules.OBAdPSASystemModule.get_page_fields();
     // If one, or more fields aren't vaild, stop move to next page.
     if (OBModules.OBAdPSASystemModule.fields_check() == false) {
       return;
     } else {
       let tmp_array = [];
-      if (current_page == 'start.html') {
-        let contract_number = document.getElementById('contract_number').value;
-        OBModules.OBAdPSASystemModule.set_data('contract_number', contract_number);
-        let revenue_type = document.getElementById('revenue_type').value;
-        OBModules.OBAdPSASystemModule.set_data('revenue_type', revenue_type);
-        let advertiser = document.getElementById('advertiser').value;
-        OBModules.OBAdPSASystemModule.set_data('advertiser', advertiser);
-        let buyer = document.getElementById('buyer').value;
-        OBModules.OBAdPSASystemModule.set_data('buyer', buyer);
-        let start_date = document.getElementById('start_date').value;
-        OBModules.OBAdPSASystemModule.set_data('start_date', start_date);
-        let stop_date = document.getElementById('stop_date').value;
-        OBModules.OBAdPSASystemModule.set_data('stop_date', stop_date);
-        let campaign_name = document.getElementById('campaign_name').value;
-        OBModules.OBAdPSASystemModule.set_data('campaign_name', campaign_name);
-        let address = document.getElementById('address').value;
-        OBModules.OBAdPSASystemModule.set_data('address', address);
-        let city = document.getElementById('city').value;
-        OBModules.OBAdPSASystemModule.set_data('city', city);
-        let state_prov = document.getElementById('state_prov').value;
-        OBModules.OBAdPSASystemModule.set_data('state_prov', state_prov);
-        let zip_code = document.getElementById('zip_code').value;
-        OBModules.OBAdPSASystemModule.set_data('zip_code', zip_code);
-        let bill_to_email = document.getElementById('bill_to_email').value;
-        OBModules.OBAdPSASystemModule.set_data('bill_to_email', bill_to_email);
-        let country = document.getElementById('country').value;
-        OBModules.OBAdPSASystemModule.set_data('country', country);
-        let sales_rep = document.getElementById('sales_rep').value;
-        OBModules.OBAdPSASystemModule.set_data('sales_rep', sales_rep);
-        let stations = $('#stations').val();
-        // a multi-select returns an array; join to a plain comma separated list.
-        let stations_str = Array.isArray(stations) ? stations.join(',') : (stations || '');
-        OBModules.OBAdPSASystemModule.set_data('stations', stations_str);
-        let time_slots_values = [];
-        let time_slots = Array.from(document.getElementById('time_slots').selectedOptions);
-        time_slots.forEach((time_slot) => {
-          time_slots_values.push(time_slot.value);
-        });
-        OBModules.OBAdPSASystemModule.set_data('time_slots', time_slots_values.join(','));
-      } else if (current_page == 'media_info.html') {
-        let creative = document.getElementById('creative').value;
-        OBModules.OBAdPSASystemModule.set_data('creative', creative);
-        let has_ad_id = document.getElementById('has_ad_id').checked;
-        console.log('has_ad_id', has_ad_id);
-        OBModules.OBAdPSASystemModule.set_data('has_ad_id', has_ad_id);
-        if (has_ad_id == false) {
-          let ad_id = document.getElementById('ad_id').value;
-          OBModules.OBAdPSASystemModule.set_data('ad_id', ad_id);
-        } else {
-          // Handle not requiring a Ad-ID.
-          OBModules.OBAdPSASystemModule.set_data('ad_id', "NA");
-          document.getElementById('ad_id').value = 'NA';
-        }
-        let media_type = OBModules.OBAdPSASystemModule.media_type_code(document.getElementById('audio_type').value);
-        OBModules.OBAdPSASystemModule.set_data('media_type', media_type);
-        OBModules.OBAdPSASystemModule.set_data('audio_type', document.getElementById('audio_type').value);
-        OBModules.OBAdPSASystemModule.set_data('message_type', document.getElementById('message_type').value);
-        // own keys: 'country' already holds the billing country from the start page.
-        OBModules.OBAdPSASystemModule.set_data('media_country', document.getElementById('country').value);
-        OBModules.OBAdPSASystemModule.set_data('media_language', document.getElementById('language').value);
-        ['voice', 'message_text', 'tts_speed', 'bed_music', 'bed_music_vol'].forEach((field) => {
-          OBModules.OBAdPSASystemModule.set_data(field, document.getElementById(field).value);
-        });
-      }
+      OBModules.OBAdPSASystemModule.store_page(current_page);
       //let tmp_array = {};
       // for (var i = 0; i < OBModules.OBAdPSASystemModule.fields.length; i++) {
       //   let name = OBModules.OBAdPSASystemModule.fields[i].name;
@@ -2142,6 +2196,81 @@ OBModules.OBAdPSASystemModule = new function()
       }
       OBModules.OBAdPSASystemModule.get_page(next_page);
     }
+  }
+
+  // Saves what's on page 1 or page 2 in the session, for the later pages, Back and
+  // Finish. The saved_<page> key tells restore_page this campaign has the page saved.
+
+  this.store_page = function(page)
+  {
+    if (page == 'start.html') {
+      let contract_number = document.getElementById('contract_number').value;
+      OBModules.OBAdPSASystemModule.set_data('contract_number', contract_number);
+      let revenue_type = document.getElementById('revenue_type').value;
+      OBModules.OBAdPSASystemModule.set_data('revenue_type', revenue_type);
+      let advertiser = OBModules.OBAdPSASystemModule.field_value('advertiser');
+      OBModules.OBAdPSASystemModule.set_data('advertiser', advertiser);
+      let buyer = document.getElementById('buyer').value;
+      OBModules.OBAdPSASystemModule.set_data('buyer', buyer);
+      let start_date = document.getElementById('start_date').value;
+      OBModules.OBAdPSASystemModule.set_data('start_date', start_date);
+      let stop_date = document.getElementById('stop_date').value;
+      OBModules.OBAdPSASystemModule.set_data('stop_date', stop_date);
+      let campaign_name = document.getElementById('campaign_name').value;
+      OBModules.OBAdPSASystemModule.set_data('campaign_name', campaign_name);
+      let address = document.getElementById('address').value;
+      OBModules.OBAdPSASystemModule.set_data('address', address);
+      let city = document.getElementById('city').value;
+      OBModules.OBAdPSASystemModule.set_data('city', city);
+      let state_prov = document.getElementById('state_prov').value;
+      OBModules.OBAdPSASystemModule.set_data('state_prov', state_prov);
+      let zip_code = document.getElementById('zip_code').value;
+      OBModules.OBAdPSASystemModule.set_data('zip_code', zip_code);
+      let bill_to_email = document.getElementById('bill_to_email').value;
+      OBModules.OBAdPSASystemModule.set_data('bill_to_email', bill_to_email);
+      let country = document.getElementById('country').value;
+      OBModules.OBAdPSASystemModule.set_data('country', country);
+      let sales_rep = document.getElementById('sales_rep').value;
+      OBModules.OBAdPSASystemModule.set_data('sales_rep', sales_rep);
+      OBModules.OBAdPSASystemModule.set_data('stations', OBModules.OBAdPSASystemModule.field_value('stations'));
+      let time_slots_values = [];
+      let time_slots = Array.from(document.getElementById('time_slots').selectedOptions);
+      time_slots.forEach((time_slot) => {
+        time_slots_values.push(time_slot.value);
+      });
+      OBModules.OBAdPSASystemModule.set_data('time_slots', time_slots_values.join(','));
+      OBModules.OBAdPSASystemModule.save_labels({'revenue_type': 'revenue_type', 'advertiser': 'advertiser', 'stations': 'stations',
+                                                 'time_slots': 'time_slots', 'state_prov': 'state_prov', 'country': 'country'});
+    } else if (page == 'media_info.html') {
+      let creative = document.getElementById('creative').value;
+      OBModules.OBAdPSASystemModule.set_data('creative', creative);
+      let has_ad_id = document.getElementById('has_ad_id').checked;
+      console.log('has_ad_id', has_ad_id);
+      OBModules.OBAdPSASystemModule.set_data('has_ad_id', has_ad_id);
+      if (has_ad_id == false) {
+        let ad_id = document.getElementById('ad_id').value;
+        OBModules.OBAdPSASystemModule.set_data('ad_id', ad_id);
+      } else {
+        // Handle not requiring a Ad-ID.
+        OBModules.OBAdPSASystemModule.set_data('ad_id', "NA");
+        document.getElementById('ad_id').value = 'NA';
+      }
+      let media_type = OBModules.OBAdPSASystemModule.media_type_code(document.getElementById('audio_type').value);
+      OBModules.OBAdPSASystemModule.set_data('media_type', media_type);
+      OBModules.OBAdPSASystemModule.set_data('audio_type', document.getElementById('audio_type').value);
+      OBModules.OBAdPSASystemModule.set_data('message_type', document.getElementById('message_type').value);
+      // own keys: 'country' already holds the billing country from the start page.
+      OBModules.OBAdPSASystemModule.set_data('media_country', document.getElementById('country').value);
+      OBModules.OBAdPSASystemModule.set_data('media_language', document.getElementById('language').value);
+      ['voice', 'message_text', 'tts_speed', 'bed_music', 'bed_music_vol'].forEach((field) => {
+        OBModules.OBAdPSASystemModule.set_data(field, OBModules.OBAdPSASystemModule.field_value(field));
+      });
+      OBModules.OBAdPSASystemModule.save_labels({'audio_type': 'audio_type', 'message_type': 'message_type', 'country': 'media_country',
+                                                 'language': 'media_language', 'bed_music': 'bed_music'});
+    } else {
+      return;
+    }
+    OBModules.OBAdPSASystemModule.set_data('saved_' + page, true);
   }
 
   // method to submit data to the server for saving of a new invoice.
@@ -2237,7 +2366,7 @@ OBModules.OBAdPSASystemModule = new function()
     data.push({'name': 'campaign_notes', 'value': OBModules.OBAdPSASystemModule.get_data('campaign_notes') || ''});
     let json_data = JSON.stringify(data);
     console.log(json_data);
-    if (next_page == 'review1.html') {
+    if (next_page == 'review.html') {
       OB.API.post('obadpsadsystemmodule', 'verify_invoice_data', {'data': json_data, 'no_ad_id': OBModules.OBAdPSASystemModule.get_data('has_ad_id')}, function(res) {
         if (res.status == false) {
           $('#ad_psa_system_status_message').obWidget('error', res.msg);
@@ -2256,118 +2385,143 @@ OBModules.OBAdPSASystemModule = new function()
     }
 }
 
-  this.review1_fill = function()
-  {
-    let review1_field_names = ['advertiser', 'address', 'city',
-                              'zip_code', 'bill_to_email',
-                              'start_date', 'stop_date', 'campaign_name', 'state_prov',
-                              'advertiser_notes', 'time_slots', 'country', 'buyer',
-                              'stations', 'contract_number', 'revenue_type'];
+  // Fills the review page with everything the wizard saved, set as text.
 
-    review1_field_names.forEach(field => {
-      if (field == 'start_date' || field == 'stop_date') {
-        if (field.startsWith('start')) {
-          let start_date = OBModules.OBAdPSASystemModule.get_data('start_date');
-          let start_time_hour = OBModules.OBAdPSASystemModule.get_data('start_time_hour');
-          document.getElementById('start_date_time').innerHTML = `${start_date} ${start_time_hour} local`;
-        } else {
-          let stop_date = OBModules.OBAdPSASystemModule.get_data('stop_date');
-          let stop_time_hour = OBModules.OBAdPSASystemModule.get_data('stop_time_hour');
-          document.getElementById('stop_date_time').innerHTML = `${stop_date} ${stop_time_hour} local`;
-        }
-      } else {
-        let value = OBModules.OBAdPSASystemModule.get_data(field);
-        let ele = document.getElementById(field);
-        ele.innerHTML = value;
-      }
+  this.review_fill = function()
+  {
+    let audio_type = OBModules.OBAdPSASystemModule.get_data('audio_type');
+    document.querySelectorAll('[data-review-mode]').forEach((row) => {
+      row.style.display = row.dataset.reviewMode.split(' ').includes(audio_type) ? '' : 'none';
     });
-    OBModules.OBAdPSASystemModule.load_current_top_screen_values();
-  }
-
-  // Fills the second review page fields.
-
-  this.review2_fill = function()
-  {
-    let review2_field_names = ['media_type', 'creative', 'ad_id'];
-
-    review2_field_names.forEach(field => {
-      if (field == 'media_type') {
-        let value = OBModules.OBAdPSASystemModule.get_data(field);
-        let labels = {'1': 'Uploaded Media', '2': 'TTS audio', '3': 'Media Library'};
-        document.getElementById(field).innerHTML = labels[value] ?? '';
-      } else {
-        let value = OBModules.OBAdPSASystemModule.get_data(field);
-        let ele = document.getElementById(field);
-        ele.innerHTML = value;
-      }
-    });
-    OBModules.OBAdPSASystemModule.load_current_top_screen_values();
-  }
-
-  // fills page fields for later use.
-
-  this.fill_page_fields = function(page)
-  {
-    switch (page) {
-      case "review1.html":
-        OBModules.OBAdPSASystemModule.review1_fill();
-        break;
-      case "review2.html":
-        OBModules.OBAdPSASystemModule.review2_fill();
-        break;
-      default:
-        //
+    // the volume only applies to a bed track.
+    if (!OBModules.OBAdPSASystemModule.get_data('bed_music')) {
+      document.getElementById('review_bed_music_vol_row').style.display = 'none';
     }
+    let units = {'tts_speed': '%', 'bed_music_vol': ' dB'};
+    document.querySelectorAll('[data-review]').forEach((ele) => {
+      let key = ele.dataset.review;
+      let value = OBModules.OBAdPSASystemModule.review_value(key);
+      ele.textContent = value != '' && units[key] ? value + units[key] : value;
+    });
+    OBModules.OBAdPSASystemModule.load_current_top_screen_values();
+  }
+
+  // A saved value as the review shows it: the names of the picked options when
+  // save_labels saved them, else the saved value itself.
+
+  this.review_value = function(key)
+  {
+    return OBModules.OBAdPSASystemModule.get_data(key + '_label') ?? OBModules.OBAdPSASystemModule.get_data(key) ?? '';
+  }
+
+  // Saves the names of the options picked in each select (id => storage key) as
+  // <key>_label, one per line, since the values saved for the server are ids and
+  // codes. A hidden option is the "Please select" placeholder, so it's not a pick.
+
+  this.save_labels = function(keys)
+  {
+    Object.entries(keys).forEach(([id, key]) => {
+      // a list still loading (restore_select) keeps the value and label saved last time.
+      if (document.getElementById(id).dataset.saved !== undefined) {
+        return;
+      }
+      let picked = Array.from(document.getElementById(id).selectedOptions).filter((option) => !option.hidden);
+      OBModules.OBAdPSASystemModule.set_data(key + '_label', picked.map((option) => option.text).join('\n'));
+    });
   }
 
   // Method to switch to, and load a page feilds when going back in the wizzard.
+  // from: the page being left, whose values are kept first (Next checks them later).
 
-  this.go_back = function(page)
+  this.go_back = function(page, from = null)
   {
+    if (from) {
+      OBModules.OBAdPSASystemModule.store_page(from);
+    }
     OBModules.OBAdPSASystemModule.get_page(page, true);
-    switch (page) {
-      case 'start.html':
-        setTimeout(() => {
-          document.getElementById('contract_number').value = OBModules.OBAdPSASystemModule.get_data('contract_number');
-          document.getElementById('revenue_type').value = OBModules.OBAdPSASystemModule.get_data('revenue_type');
-          document.getElementById('start_date').value = OBModules.OBAdPSASystemModule.get_data('start_date');
-          document.getElementById('start_time_hour').value = OBModules.OBAdPSASystemModule.get_data('start_time_hour');
-          document.getElementById('stop_date').value = OBModules.OBAdPSASystemModule.get_data('stop_date');
-          document.getElementById('stop_time_hour').value = OBModules.OBAdPSASystemModule.get_data('stop_time_hour');
-          document.getElementById('campaign_name').value = OBModules.OBAdPSASystemModule.get_data('campaign_name');
-          document.getElementById('advertiser').value = OBModules.OBAdPSASystemModule.get_data('advertiser');
-          document.getElementById('buyer').value = OBModules.OBAdPSASystemModule.get_data('buyer');
-          OBModules.OBAdPSASystemModule.fill_dropdown('stations', OBModules.OBAdPSASystemModule.get_data('stations'));
-          OBModules.OBAdPSASystemModule.fill_dropdown('time_slots', OBModules.OBAdPSASystemModule.get_data('time_slots'));
-          document.getElementById('address').value = OBModules.OBAdPSASystemModule.get_data('address');
-          document.getElementById('city').value = OBModules.OBAdPSASystemModule.get_data('city');
-          document.getElementById('state_prov').value = OBModules.OBAdPSASystemModule.get_data('state_prov');
-          document.getElementById('country').value = OBModules.OBAdPSASystemModule.get_data('country');
-          document.getElementById('zip_code').value = OBModules.OBAdPSASystemModule.get_data('zip_code');
-          document.getElementById('bill_to_email').value = OBModules.OBAdPSASystemModule.get_data('bill_to_email');
-        }, 800);
-        break;
-        case 'media_info.html':
-        setTimeout(() => {
-          document.getElementById('creative').value = OBModules.OBAdPSASystemModule.get_data('creative');
-          document.getElementById('ad_id').value = OBModules.OBAdPSASystemModule.get_data('ad_id');
-          OBModules.OBAdPSASystemModule.fill_dropdown('audio_type', OBModules.OBAdPSASystemModule.get_data('audio_type'));
-          OBModules.OBAdPSASystemModule.fill_dropdown('voice', OBModules.OBAdPSASystemModule.get_data('voice'));
-          document.getElementById('message_text').value = OBModules.OBAdPSASystemModule.get_data('message_text');
-          document.getElementById('tts_speed').value = OBModules.OBAdPSASystemModule.get_data('tts_speed');
-          OBModules.OBAdPSASystemModule.fill_dropdown('bed_music', OBModules.OBAdPSASystemModule.get_data('bed_music'));
-          document.getElementById('bed_music_vol').value = OBModules.OBAdPSASystemModule.get_data('bed_music_vol');
-          OBModules.OBAdPSASystemModule.bed_music_handling();
-          // only a saved choice replaces the default country.
-          OBModules.OBAdPSASystemModule.fill_dropdown('country', OBModules.OBAdPSASystemModule.get_data('media_country'));
-          document.getElementById('language').value = OBModules.OBAdPSASystemModule.get_data('media_language') || '';
-          OBModules.OBAdPSASystemModule.fill_dropdown('message_type', OBModules.OBAdPSASystemModule.get_data('message_type'));
-          OBModules.OBAdPSASystemModule.selected_audio_type();
-          OBModules.OBAdPSASystemModule.restore_media_selection();
-        }, 800);
-        break;
+  }
+
+  // Puts back what this campaign saved for a page as it opens: after Back, or on
+  // page 2 again after Back to page 1. A new campaign has nothing saved (start_page).
+
+  this.restore_page = function(page)
+  {
+    if (OBModules.OBAdPSASystemModule.get_data('saved_' + page) === null) {
+      return;
+    }
+    if (page == 'start.html') {
+      ['contract_number', 'start_date', 'stop_date', 'campaign_name', 'buyer', 'address', 'city', 'zip_code', 'sales_rep', 'bill_to_email'].forEach((id) => {
+        document.getElementById(id).value = OBModules.OBAdPSASystemModule.get_data(id);
+      });
+      ['revenue_type', 'advertiser', 'stations', 'time_slots', 'state_prov', 'country'].forEach((id) => {
+        OBModules.OBAdPSASystemModule.restore_select(id, OBModules.OBAdPSASystemModule.get_data(id));
+      });
+    } else if (page == 'media_info.html') {
+      ['creative', 'ad_id', 'message_text', 'tts_speed', 'bed_music_vol'].forEach((id) => {
+        document.getElementById(id).value = OBModules.OBAdPSASystemModule.get_data(id);
+      });
+      // the "I don't have a Ad-ID" box (saved as has_ad_id) and the Ad-ID row it hides.
+      let no_ad_id = OBModules.OBAdPSASystemModule.get_data('has_ad_id') == 'true';
+      document.getElementById('has_ad_id').checked = no_ad_id;
+      document.getElementById('ad_id_row').style.visibility = no_ad_id ? 'hidden' : 'visible';
+      // own keys: 'country' already holds the billing country from the start page.
+      [['audio_type', 'audio_type'], ['message_type', 'message_type'], ['country', 'media_country'],
+       ['language', 'media_language'], ['voice', 'voice'], ['bed_music', 'bed_music']].forEach(([id, key]) => {
+        OBModules.OBAdPSASystemModule.restore_select(id, OBModules.OBAdPSASystemModule.get_data(key));
+      });
+      OBModules.OBAdPSASystemModule.bed_music_handling();
+      OBModules.OBAdPSASystemModule.selected_audio_type();
+      OBModules.OBAdPSASystemModule.restore_media_selection();
     }
   }
+
+  // Picks saved values (a comma separated list for a multiple select) in a select;
+  // nothing saved keeps the page's default. A list filled from the server may not
+  // be there yet, so the values wait on the select for list_loaded.
+
+  this.restore_select = function(id, value)
+  {
+    let select = document.getElementById(id);
+    if (select == null || !value) {
+      return;
+    }
+    select.dataset.saved = value;
+    OBModules.OBAdPSASystemModule.list_loaded(id);
+  }
+
+  // A field's value (a comma separated list for a multiple select). A list still
+  // loading gives the saved value waiting for it (restore_select).
+
+  this.field_value = function(id)
+  {
+    let field = document.getElementById(id);
+    if (field.dataset.saved !== undefined) {
+      return field.dataset.saved;
+    }
+    return field.multiple ? OBModules.OBAdPSASystemModule.selected_options(id) : field.value;
+  }
+
+  // Called once a list's options are in: picks the saved values waiting on it.
+  // Returns true if it picked any.
+
+  this.list_loaded = function(id)
+  {
+    let select = document.getElementById(id);
+    if (select == null || select.dataset.saved === undefined) {
+      return false;
+    }
+    let values = select.multiple ? select.dataset.saved.split(',') : [select.dataset.saved];
+    let options = Array.from(select.options).filter((option) => values.includes(option.value));
+    if (options.length == 0) {
+      return false;
+    }
+    options.forEach((option) => {
+      option.selected = true;
+    });
+    delete select.dataset.saved;
+    return true;
+  }
+
   // Events listener for a default language.
   // This method handles enabling the subsets.
   this.language_selected = function()
@@ -2435,11 +2589,11 @@ OBModules.OBAdPSASystemModule = new function()
            OBModules.OBAdPSASystemModule.tts_voice_init();
          }
 
-         if (page == 'review1.html') {
-           OBModules.OBAdPSASystemModule.fill_page_fields(page);
-         } else if (page == 'review2.html') {
-           OBModules.OBAdPSASystemModule.fill_page_fields(page);
+         if (page == 'review.html') {
+           OBModules.OBAdPSASystemModule.review_fill();
          }
+         // what this campaign already saved for the page (Back, or page 2 again after Back to page 1).
+         OBModules.OBAdPSASystemModule.restore_page(page);
 
          if (page == 'submiting.html') {
            console.log('Submiting invoice/AD message.');

@@ -310,3 +310,16 @@ MIT Licensed
   border: 4px solid red;
   padding: 64px;
 }
+
+/* Review page: each label lines up with the first line of its value, lists show one
+   item per line, and long text wraps. */
+
+.campaign_review .fieldrow {
+	align-items: baseline;
+}
+
+.campaign_review [data-review] {
+	flex: 1;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}

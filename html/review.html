@@ -1,0 +1,174 @@
+<!--/*
+    Copyright 2012 OpenBroadcaster, Inc.
+
+    This file is part of OpenBroadcaster Server.
+
+    OpenBroadcaster Server is free software you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenBroadcaster Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with OpenBroadcaster Server.  If not, see <http//www.gnu.org/licenses/>.
+*/-->
+
+<h1>New Campaign</h1>
+<label for="current_advertiser">Advertiser</label>
+<span id="current_advertiser">Loading...</span>
+<hr>
+<label for="current_buyer">Buyer</label>
+<span id="current_buyer">Loading...</span>
+<obwidget type="message" id="ad_psa_system_status_message"></obwidget>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 3 of 3
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('media_info.html');">Back</button>
+	<button type="button" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.submit_invoice();">Finish</button>
+</div>
+<h2>Review</h2>
+<!-- review_fill sets each data-review value from what the wizard saved. -->
+<fieldset class="campaign_review">
+	<legend>
+		Campaign
+	</legend>
+	<div class="fieldrow">
+		<label>Campaign Name</label>
+		<span data-review="campaign_name"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Contract Number</label>
+		<span data-review="contract_number"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Revenue Type</label>
+		<span data-review="revenue_type"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Start Date</label>
+		<span data-review="start_date"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Stop Date</label>
+		<span data-review="stop_date"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Stations</label>
+		<span data-review="stations"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Time Slots</label>
+		<span data-review="time_slots"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Sales Rep</label>
+		<span data-review="sales_rep"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Campaign Notes</label>
+		<span data-review="campaign_notes"></span>
+	</div>
+</fieldset>
+<fieldset class="campaign_review">
+	<legend>
+		Advertiser and billing
+	</legend>
+	<div class="fieldrow">
+		<label>Advertiser</label>
+		<span data-review="advertiser"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Buyer</label>
+		<span data-review="buyer"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Address</label>
+		<span data-review="address"></span>
+	</div>
+	<div class="fieldrow">
+		<label>City</label>
+		<span data-review="city"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Province/State</label>
+		<span data-review="state_prov"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Country</label>
+		<span data-review="country"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Postal/ZIP Code</label>
+		<span data-review="zip_code"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Email</label>
+		<span data-review="bill_to_email"></span>
+	</div>
+</fieldset>
+<fieldset class="campaign_review">
+	<legend>
+		(Creative) Media
+	</legend>
+	<div class="fieldrow">
+		<label>Creative</label>
+		<span data-review="creative"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Ad-ID</label>
+		<span data-review="ad_id"></span>
+	</div>
+	<div class="fieldrow">
+		<label>Media Type</label>
+		<span data-review="audio_type"></span>
+	</div>
+	<!-- data-review-mode: the Media Types a row shows for, as on page 2. -->
+	<div class="fieldrow" data-review-mode="upload aws_tts">
+		<label>Message Type</label>
+		<span data-review="message_type"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="upload aws_tts">
+		<label>Country</label>
+		<span data-review="media_country"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="upload aws_tts">
+		<label>Language</label>
+		<span data-review="media_language"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="library">
+		<label>Library Media</label>
+		<span data-review="library_media_label"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="aws_tts">
+		<label>Polly TTS Voice</label>
+		<span data-review="voice"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="aws_tts">
+		<label>Message Text</label>
+		<span data-review="message_text"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="aws_tts">
+		<label>Voice Speed</label>
+		<span data-review="tts_speed"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="aws_tts">
+		<label>Bed Music</label>
+		<span data-review="bed_music"></span>
+	</div>
+	<div class="fieldrow" data-review-mode="aws_tts" id="review_bed_music_vol_row">
+		<label>Bed Music Volume</label>
+		<span data-review="bed_music_vol"></span>
+	</div>
+</fieldset>
+<div class="Wizard_nav">
+	<div class="nav_status">
+		page 3 of 3
+	</div>
+	<button type="button" id="back_btn" onclick="OBModules.OBAdPSASystemModule.go_back('media_info.html');">Back</button>
+	<button type="button" class="add next_btn" onclick="OBModules.OBAdPSASystemModule.submit_invoice();">Finish</button>
+</div>
