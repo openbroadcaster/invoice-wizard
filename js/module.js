@@ -112,23 +112,21 @@ OBModules.OBAdPSASystemModule = new function()
     OBModules.OBAdPSASystemModule.load_logs();
   }
 
-  // Loads the log data.
+  // Loads the log data: newest first, or A to Z by the column whose header was clicked.
 
-  this.load_logs = function(sort_col='name')
+  this.load_logs = function(sort_col = 'time')
   {
-    let table = document.getElementById('logs_table_body');
-    let val = localStorage.getItem('logs_table_sortby');
-    if (val != null) {
-      sort_col = val;
-    } else {
-        sort_col = 'method';
-    }
-    // Clear table.
-    table.innerHTML = '';
     OB.API.post('obadpsadsystemmodule', 'get_logs', {
       'sort_col': sort_col,
-      'sort_dir': 'asc'
+      'sort_dir': sort_col == 'time' ? 'desc' : 'asc'
     }, function(res) {
+      let table = document.getElementById('logs_table_body');
+      // the page was left before the reply came.
+      if (table == null) {
+        return;
+      }
+      // cleared here, not before asking: two loads in a row would each add their rows.
+      table.innerHTML = '';
       if (res.status) {
         res.data.forEach(log_item => {
           console.log(log_item);
@@ -136,6 +134,13 @@ OBModules.OBAdPSASystemModule = new function()
         });
       }
     });
+  }
+
+  // The column headers' links.
+
+  this.sort_log = function(sort_col)
+  {
+    OBModules.OBAdPSASystemModule.load_logs(sort_col);
   }
 
   // Add item to the logs into the table.
@@ -148,9 +153,10 @@ OBModules.OBAdPSASystemModule = new function()
     let cell2 = row.insertCell(1);
     let cell3 = row.insertCell(2);
 
+    // in the headers' order: Method, Time, Message.
     cell1.innerHTML = htmlspecialchars(method);
-    cell2.innerHTML = htmlspecialchars(message);
-    cell3.innerHTML = htmlspecialchars(time);
+    cell2.innerHTML = htmlspecialchars(time);
+    cell3.innerHTML = htmlspecialchars(message);
   }
 
   // Displays the current advertisers in
@@ -659,8 +665,13 @@ OBModules.OBAdPSASystemModule = new function()
         return;
       }
       if (res.status) {
+        // only voices not listed yet: a page opened twice quickly gets both replies.
+        let listed = Array.from(document.getElementById('voice').options).map((option) => option.value);
         res.data.forEach((voice) => {
-          OBModules.OBAdPSASystemModule.dropdown_add_item('voice', voice.voice_name);
+          if (!listed.includes(voice.voice_name)) {
+            OBModules.OBAdPSASystemModule.dropdown_add_item('voice', voice.voice_name);
+            listed.push(voice.voice_name);
+          }
         });
         OBModules.OBAdPSASystemModule.list_loaded('voice');
       } else {
@@ -1255,7 +1266,7 @@ OBModules.OBAdPSASystemModule = new function()
   // Loads the currently enabled languages into the
   // checkboxes on the settings page.
 
-  this.load_enabled_langauges = function()
+  this.load_enabled_langauges = function(done)
   {
     OB.API.post('obadpsadsystemmodule', 'get_setting', {'setting_name': 'enabled_languages'}, function(res) {
       if (res.status) {
@@ -1292,6 +1303,9 @@ OBModules.OBAdPSASystemModule = new function()
             }
         });
       }
+      if (done) {
+        done();
+      }
     });
   }
 
@@ -1299,13 +1313,22 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.load_settings = function() {
     console.log('loading settings...');
-    OBModules.OBAdPSASystemModule.load_enabled_langauges();
     let settings_name = ['company_name', 'currency', 'aws_region_name', 'aws_access_key_id', 'aws_secret_access_key', 'stripe_publishable_key', 'stripe_secret_key',
                         'company_phone', 'company_street_address', 'company_state_prov', 'company_city',
                         'company_zip_code', 'company_country', 'morning_hourly_rate',
                         'midday_hourly_rate', 'drive_hourly_rate', 'ros_hourly_rate',
                         'default_country', 'default_language', 'default_language', 'default_language_sets',
                         'hst_number'];
+    // Save stays off until every value is in: it saves every field as shown, so an early Save blanks the rest.
+    let save_btn = document.getElementById('save_settings_btn');
+    let waiting = settings_name.length + 1;
+    let loaded = () => {
+      waiting--;
+      if (waiting == 0 && save_btn != null) {
+        save_btn.disabled = false;
+      }
+    };
+    OBModules.OBAdPSASystemModule.load_enabled_langauges(loaded);
 
     for (var i = 0; i < settings_name.length; i++) {
       let dom_ele = settings_name[i];
@@ -1314,8 +1337,11 @@ OBModules.OBAdPSASystemModule = new function()
         try {
           if (dom_ele == 'default_language_sets') {
             dom_ele = 'language_sets';
-            let language_set_items = res.data.split(',');
+            // each set once, in a cleared list: the page can load its settings twice (opened twice
+            // quickly), and Save stores every selected set.
+            let language_set_items = [...new Set(res.data.split(','))];
             console.log('language_set_items', language_set_items);
+            document.getElementById(dom_ele).innerHTML = '';
             OBModules.OBAdPSASystemModule.add_dropdown_items(dom_ele, language_set_items);
             language_set_items.forEach(item => {
               OBModules.OBAdPSASystemModule.fill_dropdown(dom_ele, item);
@@ -1332,6 +1358,7 @@ OBModules.OBAdPSASystemModule = new function()
         } catch (e) {
           console.log(`Not displaying settings ${dom_ele}, due to the add conpany modal being closed.`);
         }
+        loaded();
       });
     }
     // Handles first load of language sets.
@@ -1342,8 +1369,8 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.view_settings = function()
   {
+      // get_page loads the values once the page is in.
       OBModules.OBAdPSASystemModule.get_page('settings.html');
-      setTimeout(OBModules.OBAdPSASystemModule.load_settings, 2000);
   }
 
   // Disable, or Enable text fields on the page.
@@ -2117,15 +2144,24 @@ OBModules.OBAdPSASystemModule = new function()
 
   this.message_text_onload = function()
   {
-    this.character_count = document.getElementById('character_count');
     let message_text_box = document.getElementById('message_text');
     message_text_box.addEventListener('keydown', OBModules.OBAdPSASystemModule.message_text_on_keydown);
+    // input comes after every change, a paste included; keydown comes before the key changes the text.
+    message_text_box.addEventListener('input', OBModules.OBAdPSASystemModule.show_character_count);
+  }
+
+  this.show_character_count = function()
+  {
+    let message_text_box = document.getElementById('message_text');
+    let character_count = document.getElementById('character_count');
+    if (message_text_box != null && character_count != null) {
+      character_count.innerHTML = message_text_box.value.length + ' chars';
+    }
   }
 
   this.message_text_on_keydown = function(e)
   {
     let count = e.target.value.length;
-    OBModules.OBAdPSASystemModule.character_count.innerHTML = count + ' chars';
     if (count >= 3000) {
       if (e.key == 'Backspace' || e.key == 'Delete') {
       } else {
@@ -2460,6 +2496,7 @@ OBModules.OBAdPSASystemModule = new function()
       ['creative', 'ad_id', 'message_text', 'tts_speed', 'bed_music_vol'].forEach((id) => {
         document.getElementById(id).value = OBModules.OBAdPSASystemModule.get_data(id);
       });
+      OBModules.OBAdPSASystemModule.show_character_count();
       // the "I don't have a Ad-ID" box (saved as has_ad_id) and the Ad-ID row it hides.
       let no_ad_id = OBModules.OBAdPSASystemModule.get_data('has_ad_id') == 'true';
       document.getElementById('has_ad_id').checked = no_ad_id;
@@ -2587,6 +2624,9 @@ OBModules.OBAdPSASystemModule = new function()
          } else if (page == 'media_info.html') {
            OBModules.OBAdPSASystemModule.media_data_init();
            OBModules.OBAdPSASystemModule.tts_voice_init();
+         } else if (page == 'settings.html') {
+           // once the page is in, not after a fixed wait: on a slow server the old 2 s wait ran before it.
+           OBModules.OBAdPSASystemModule.load_settings();
          }
 
          if (page == 'review.html') {

@@ -149,7 +149,7 @@
 		<label for="enabled_sets">Spanish</label>
 		<input type="checkbox" id="Spanish_checkbox" value="Spanish" onchange="OBModules.OBAdPSASystemModule.update_enabled_languages();">
 	</div>
-	<button onclick="OBModules.OBAdPSASystemModule.save_settings();">Save</button>
+	<button id="save_settings_btn" onclick="OBModules.OBAdPSASystemModule.save_settings();" disabled>Save</button>
 </fieldset>
 <script>
 OBModules.OBAdPSASystemModule.station_logo_init();

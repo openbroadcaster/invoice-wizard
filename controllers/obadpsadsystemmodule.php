@@ -322,7 +322,8 @@ class OBAdPSADSystemModule extends OBFController
       $default_language = $language;
     }
     $voices = [];
-    $default_language_sets = explode(',', $this->SettingsModel->get_setting('default_language_sets'));
+    // each set once: a set saved twice ("US,US") would list its voices twice.
+    $default_language_sets = array_unique(explode(',', $this->SettingsModel->get_setting('default_language_sets')));
     if ($default_language == 'English') {
       foreach ($default_language_sets as $default_language_set) {
         switch ($default_language_set) {
